@@ -434,7 +434,7 @@ section{padding-block:var(--section);position:relative}
   transition:opacity .8s var(--ease) 2.2s}
 /* Linjärt, inte var(--ease): den kurvan lägger nästan hela vägen i
    början och strimman blir en blixt i stället för ett svep. */
-.thirty .sheen{display:none}   /* kometen gör samma jobb, till halva priset */
+.thirty.lit .sheen{opacity:1;animation:skimraGenom 7s linear 2.4s infinite}
 /* Undantag från "animera bara transform och opacity": ETT element, en
    textyta, och det är den enda rörelsen som faktiskt läser som guld. */
 @keyframes skimraGenom{
@@ -457,9 +457,8 @@ section{padding-block:var(--section);position:relative}
   z-index:5;mix-blend-mode:plus-lighter}
 .ol text{fill:none;font-family:var(--font-display);font-weight:700;
   stroke-linecap:round;stroke-linejoin:round}
-.ol .ol-far{stroke:rgba(248,168,26,.2);stroke-dasharray:0 4000}
-.ol .ol-tail{stroke:rgba(255,196,58,.42);stroke-dasharray:0 4000}
-.ol .ol-core{stroke:#ffdf7d;stroke-dasharray:0 4000}
+.ol .ol-tail{stroke:rgba(255,196,58,.5);stroke-dasharray:0 4000}
+.ol .ol-core{stroke:#fff;stroke-dasharray:0 4000}   /* vitheten gör den HET, ur design-manualen */
 
 .thirty .ol{opacity:0;transition:opacity 1.2s var(--ease) 1.6s}
 .thirty.lit .ol{opacity:1}
@@ -473,9 +472,14 @@ section{padding-block:var(--section);position:relative}
 /* ETT sken per lager. Filtret räknas om varje bildruta så länge strecket
    rör sig — tre lager med fyra sken var kostade mer än allt annat på
    sidan tillsammans. Räckvidden ligger kvar; den kommer av radien. */
-.thirty .ol .ol-far{filter:drop-shadow(0 0 calc(var(--olglow,6px)*3) rgba(214,140,14,.4))}
-.thirty .ol .ol-tail{filter:drop-shadow(0 0 calc(var(--olglow,6px)*1.8) rgba(240,166,20,.6))}
-.thirty .ol .ol-core{filter:drop-shadow(0 0 var(--olglow,10px) rgba(252,196,50,.95))}
+/* Ur design-manualens komet-recept, rakt av — bara accentfärgen bytt
+   till guld. Vit kärna med två vita sken plus ett gulddjupt, svansen
+   ett enda guldsken. Inget "eget" påhittat facit, bara omfärgat. */
+.thirty .ol .ol-tail{filter:drop-shadow(0 0 calc(var(--olglow,6px)*1.4) rgba(240,166,20,.9))}
+.thirty .ol .ol-core{filter:
+  drop-shadow(0 0 calc(var(--olglow,10px)*.5)  #fff)
+  drop-shadow(0 0 calc(var(--olglow,10px)*1.4) #fff)
+  drop-shadow(0 0 calc(var(--olglow,10px)*3.2) rgba(248,182,28,1))}
 /* Streckmönstret sätts i px av skriptet när konturlängden är känd. */
 .thirty.lit .ol text{animation:olKomet var(--oldur,7.5s) linear infinite}
 @keyframes olKomet{to{stroke-dashoffset:var(--olrun,-2000)}}
@@ -1049,7 +1053,6 @@ section{padding-block:var(--section);position:relative}
           <span class="num au">30</span>
           <span class="sheen" aria-hidden="true">30</span>
           <svg class="ol" aria-hidden="true" focusable="false">
-            <text class="ol-far">30</text>
             <text class="ol-tail">30</text>
             <text class="ol-core">30</text>
           </svg>
@@ -1562,10 +1565,12 @@ section{padding-block:var(--section);position:relative}
          att det ska släpa efter i stället fasförskjuts varje lager i tid:
          att halka L pixlar motsvarar dur * L/varv. */
       var dur = 7.5;
+      /* Två lager i stället för tre. Kärnan tunnare, svansen dras ut långt
+         och tapras nästan bort — bredden går mot 0 i stället för att
+         hålla samma tjocklek hela vägen ut. */
       var seg = [
-        {el:ts[2], len:Math.max(11, cap*.22),  w:Math.max(1.2, cap*.018)},  /* kärna */
-        {el:ts[1], len:Math.max(52, cap*1.30), w:Math.max(1.0, cap*.014)},  /* svans */
-        {el:ts[0], len:Math.max(96, cap*2.90), w:Math.max(0.8, cap*.010)}   /* utlöpare */
+        {el:ts[1], len:Math.max(9,  cap*.17), w:Math.max(0.8, cap*.012)},  /* kärna */
+        {el:ts[0], len:Math.max(110,cap*3.1), w:Math.max(0.25,cap*.0035)}  /* svans */
       ];
       for(var q=0;q<seg.length;q++){
         var L = Math.round(seg[q].len);
