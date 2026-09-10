@@ -350,16 +350,19 @@ section{padding-block:var(--section);position:relative}
                   filter på samma element (filter dödar blenden tyst).
    isolation på .thirty stänger in plus-lighter i lockupen, så spoten
    lyser upp guldet och inte hela bakgrundsvideon. */
-.thirty .halo{position:absolute;inset:-72% -34%;z-index:0;pointer-events:none;
+/* Uppskalad en aning (inset + stopp) för att matcha målbildens ljusstyrka
+   sedan kontur-spårande kometen togs bort — bilden bär sin glöd själv
+   nu, ingen rörlig kontur att luta sig mot längre. */
+.thirty .halo{position:absolute;inset:-84% -42%;z-index:0;pointer-events:none;
   border-radius:50%;opacity:0;transition:opacity 1.8s var(--ease) .2s;
   background:radial-gradient(circle at 50% 52%,
-    rgba(255,206,84,.24) 0%,
-    rgba(248,186,48,.20) 12%,
-    rgba(234,166,32,.15) 24%,
-    rgba(212,144,20,.11) 38%,
-    rgba(184,120,14,.075) 52%,
-    rgba(156,100,10,.045) 66%,
-    rgba(128,80,6,.022)  80%,
+    rgba(255,206,84,.30) 0%,
+    rgba(248,186,48,.25) 12%,
+    rgba(234,166,32,.19) 24%,
+    rgba(212,144,20,.14) 38%,
+    rgba(184,120,14,.095) 52%,
+    rgba(156,100,10,.058) 66%,
+    rgba(128,80,6,.028)  80%,
     rgba(110,68,4,0)     94%)}
 .thirty.lit .halo{opacity:1;animation:haloAndas 4.4s ease-in-out infinite alternate}
 @keyframes haloAndas{
@@ -370,8 +373,16 @@ section{padding-block:var(--section);position:relative}
 /* Kantglöden, hämtad ur Delta-lärdomen: en VIT het kärna närmast glyfen
    som blöder ut i guld. Det är vitheten som gör den het — bara guld ger
    en matt boll. drop-shadow följer bokstavens alfa, så skenet lägger sig
-   längs kanten och inte i en fyrkant runt om. Elementet står still, så
-   staplade skuggor är tillåtna (jfr perf-regeln om rörliga element). */
+   längs kanten och inte i en fyrkant runt om.
+   RÄTTAT (ÖFK-Claude hittade den): kommentaren sa förut "elementet står
+   still, så staplade skuggor är tillåtna" — men perf-regeln handlar om
+   vad som MÅLAS OM, inte elementets skärmposition. En `guldflode`-
+   animation av `background-position` på SAMMA element som filtret
+   tvingade webbläsaren att räkna om alla fem Gaussiska oskärpor varje
+   bildruta, för evigt, precis som om filtret självt animerats. .num är
+   nu helt statisk (fast bakgrundsposition, filtret räknas ut en gång).
+   Det vandrande guldet ligger i stället i .flode — en oscärpad dubblett
+   ovanpå, exakt samma grepp som .sheen redan använder på samma yta. */
 .thirty .num{position:relative;z-index:2;
   font-family:var(--font-display);font-weight:700;font-size:1em;
   line-height:.78;letter-spacing:-.045em;
@@ -380,28 +391,26 @@ section{padding-block:var(--section);position:relative}
      höger utanför rutan — och den biten blir helt omålad. Det såg ut som
      att nollans högerkant var avskuren. Padding ger rutan plats. */
   padding-right:.06em;
-  /* Guld direkt, inte en uppspelning från mörkt. Toningen är högre än
-     rutan, så den synliga skivan kan vandra genom rampen — guldet flyter
-     i stället för att ligga still. */
   background-size:100% 220%;background-position:50% 50%;
   filter:
     drop-shadow(0 0 calc(var(--u)*.08) rgba(255,208,88,.45))
     drop-shadow(0 0 calc(var(--u)*.45) rgba(244,184,44,.40))
     drop-shadow(0 0 calc(var(--u)*2.2) rgba(214,150,26,.28))
     drop-shadow(0 0 calc(var(--u)*6.5) rgba(180,120,14,.2))
-    drop-shadow(0 0 calc(var(--u)*15) rgba(140,88,6,.13));
-  animation:guldflode 11s ease-in-out infinite alternate}
-/* Två animationer på samma element: rampen vandrar, glöden andas.
-   background-position är ett medvetet undantag från "bara transform och
-   opacity" — ETT element, en textyta, elva sekunder per andetag. */
-.thirty.lit .num{animation:guldflode 11s ease-in-out infinite alternate}
+    drop-shadow(0 0 calc(var(--u)*15) rgba(140,88,6,.13))}
+/* .flode: identisk text/gradient som .num, men UTAN filter — bär den
+   animerade bakgrundspositionen i stället, additivt ovanpå (samma
+   glyfform, samma ramp, så den bara ersätter ytan visuellt; skenet från
+   .num:s filter blöder fortfarande utanför konturen därunder). */
+.thirty .flode{position:absolute;inset:0;z-index:2;pointer-events:none;
+  font-family:var(--font-display);font-weight:700;font-size:1em;
+  line-height:.78;letter-spacing:-.045em;padding-right:.06em;
+  background-size:100% 220%;background-position:50% 50%}
+.thirty.lit .flode{animation:guldflode 11s ease-in-out infinite alternate}
 @keyframes guldflode{
   from{background-position:50% 22%}
   to  {background-position:50% 78%}
 }
-/* kantglod borttagen: den animerade fyra drop-shadows på trettian,
-   vilket räknade om ett gaussiskt filter över hela glyfen varje
-   bildruta. Skenet ligger kvar statiskt i .thirty .num. */
 
 /* Årtalen är flat ljusguld i skissen, ingen toning. */
 /* Årtalen i Civic — ryggnumren. Snittet är bredare och lägre än
@@ -443,46 +452,17 @@ section{padding-block:var(--section);position:relative}
   100% {background-position:-42% 0}   /* sedan vila */
 }
 
-/* Konturkomet — Delta-greppet, men längs siffrans egen bokstavsform i
-   stället för runt en ram. SVG-text tar stroke-dasharray, och strecket
-   följer då glyfens kontur: ett litet ljus far runt trean, nollans utsida
-   och nollans öga samtidigt. Litet och guldfärgat, inte ett bloss.
-   Blandningen ligger på <svg>, filtren på strecken — aldrig samma element
-   (fälla 6 i komet-anteckningarna). Läget sätts av skriptet ur en riktig
-   canvas-mätning; versalhöjden gissas aldrig. */
-/* Basreglerna får INTE ligga under .thirty — rubriken använder samma
-   komponent. Utan position blir svg:n ett inline-element på 300x150 som
-   blåser upp radboxen. */
-.ol{position:absolute;inset:0;overflow:visible;pointer-events:none;
-  z-index:5;mix-blend-mode:plus-lighter}
-.ol text{fill:none;font-family:var(--font-display);font-weight:700;
-  stroke-linecap:round;stroke-linejoin:round}
-.ol .ol-tail{stroke:rgba(255,196,58,.5);stroke-dasharray:0 4000}
-.ol .ol-core{stroke:#fff;stroke-dasharray:0 4000}   /* vitheten gör den HET, ur design-manualen */
-
-.thirty .ol{opacity:0;transition:opacity 1.2s var(--ease) 1.6s}
-.thirty.lit .ol{opacity:1}
-.thirty .ol text{font-size:var(--fs-thirty);letter-spacing:-.045em}
-/* Strecktjocklek och glöd sätts av skriptet ur siffrans VERSALHÖJD, inte
-   ur --u. Annars blir kometen proportionellt tre gånger grövre på en
-   telefon än på en bred skärm, eftersom --u där styrs av bredden. */
-/* Tre streck på samma bana: het kärna först, sedan en svans, sedan en
-   lång svag utlöpare. Varje lager har flera sken med fallande alfa —
-   ett enda sken har hård kant, flera ger långt mjukt avtagande. */
-/* ETT sken per lager. Filtret räknas om varje bildruta så länge strecket
-   rör sig — tre lager med fyra sken var kostade mer än allt annat på
-   sidan tillsammans. Räckvidden ligger kvar; den kommer av radien. */
-/* Ur design-manualens komet-recept, rakt av — bara accentfärgen bytt
-   till guld. Vit kärna med två vita sken plus ett gulddjupt, svansen
-   ett enda guldsken. Inget "eget" påhittat facit, bara omfärgat. */
-.thirty .ol .ol-tail{filter:drop-shadow(0 0 calc(var(--olglow,6px)*1.4) rgba(240,166,20,.9))}
-.thirty .ol .ol-core{filter:
-  drop-shadow(0 0 calc(var(--olglow,10px)*.5)  #fff)
-  drop-shadow(0 0 calc(var(--olglow,10px)*1.4) #fff)
-  drop-shadow(0 0 calc(var(--olglow,10px)*3.2) rgba(248,182,28,1))}
-/* Streckmönstret sätts i px av skriptet när konturlängden är känd. */
-.thirty.lit .ol text{animation:olKomet var(--oldur,7.5s) linear infinite}
-@keyframes olKomet{to{stroke-dashoffset:var(--olrun,-2000)}}
+/* Kontur-spårande kometen, åter. Kontur-spårningen var aldrig fel —
+   Anders bekräftat: "inget har ändrats där". Det som ändrades: EN färg
+   (#f0cc7b) på alla lager i stället för vit-till-guld-mix, och
+   mix-blend-mode:overlay i stället för screen (Photoshops "Overlay",
+   samma algoritm). Tjockt huvud/tunn svans var redan rätt struktur
+   (bred/kort lager vid nosen, smalt/långt kärnlager i svansen — se
+   kometBygg) och rörs inte. */
+.kmt{position:absolute;z-index:5;overflow:visible;pointer-events:none;
+  mix-blend-mode:overlay;opacity:0}
+.thirty.lit .kmt{opacity:1}
+.kmt path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 
 /* Rubrikens guldkontur ligger i ett ::before med samma text INUTI
    rubriken. Då ärver den den animerade spärren automatiskt och kan
@@ -1051,10 +1031,28 @@ section{padding-block:var(--section);position:relative}
         <span class="yr" aria-hidden="true">19</span>
         <span class="numwrap">
           <span class="num au">30</span>
+          <span class="flode au" aria-hidden="true">30</span>
           <span class="sheen" aria-hidden="true">30</span>
-          <svg class="ol" aria-hidden="true" focusable="false">
-            <text class="ol-tail">30</text>
-            <text class="ol-core">30</text>
+          <!-- preserveAspectRatio: default (uniform skala), INTE "none".
+             Icke-uniform skalning grovrenderar kurvor och streckkanter
+             ("pixligt", Anders). Bläckboxen mäts exakt i mat() så
+             letterbox-offseten som "none" en gång skyddade mot är
+             försumbar nu. -->
+          <svg class="kmt" viewBox="0 0 872.77 878.93" aria-hidden="true" focusable="false">
+            <!-- Riktig glyf-geometri, outline:ad ur Rift Bold, se
+               media/source/30.svg. "3" = en kontur, "0" = två (yttring
+               + hål) — en komet besöker dem i tur och ordning. Varje
+               grupp har EN mall-path; skriptet klonar fram lagren vid
+               körning (kometBygg). -->
+            <g class="kc">
+              <path class="seg" pathLength="100" d="M327.76,422.28c74.88,14.73,83.47,77.34,83.47,123.98v150.99c0,120.3-63.83,181.68-189.04,181.68h-33.14C63.83,878.93,0,817.55,0,697.25v-115.39h137.49v100.66c0,60.15,30.69,78.56,63.83,78.56h8.59c33.14,0,63.83-18.41,63.83-78.56v-133.8c0-45.42-25.78-66.29-58.92-66.29h-104.34v-115.39h92.07c44.19,0,71.2-20.87,71.2-78.56v-92.07c0-60.15-30.69-78.56-63.83-78.56h-11.05c-33.14,0-63.83,18.41-63.83,78.56v81.02H0v-95.75C0,49.1,76.11,0,201.32,0h8.59c125.21,0,201.32,49.1,201.32,181.68v105.57c0,54.01-12.28,123.98-83.47,135.03Z"/>
+            </g>
+            <g class="kc">
+              <path class="seg" pathLength="100" d="M872.77,181.68v515.57c0,130.12-77.34,181.68-206.23,181.68h-9.82c-128.89,0-206.23-51.56-206.23-181.68V181.68C450.5,51.56,527.83,0,656.72,0h9.82c128.89,0,206.23,51.56,206.23,181.68Z"/>
+            </g>
+            <g class="kc">
+              <path class="seg" pathLength="100" d="M661.63,125.21c-45.42,0-73.65,17.19-73.65,78.56v471.38c0,61.38,28.23,78.56,73.65,78.56s73.65-17.19,73.65-78.56V203.77c0-61.38-28.23-78.56-73.65-78.56Z"/>
+            </g>
           </svg>
         </span>
         <span class="yr" aria-hidden="true">96</span>
@@ -1402,7 +1400,7 @@ section{padding-block:var(--section);position:relative}
       <div class="thirty footlock lit" aria-hidden="true">
         <span class="halo"></span>
         <span class="yr">19</span>
-        <span class="numwrap"><span class="num au">30</span></span>
+        <span class="numwrap"><span class="num au">30</span><span class="flode au">30</span></span>
         <span class="yr">96</span>
       </div>
 
@@ -1499,8 +1497,369 @@ section{padding-block:var(--section);position:relative}
      Båda mäts i canvas ur de FAKTISKA typsnitten, efter att de laddats. */
   var wrap = document.querySelector('.thirty .numwrap');
   var numEl = wrap && wrap.querySelector('.num');
-  var olEl  = wrap && wrap.querySelector('.ol');
+  var kmtEl = wrap && wrap.querySelector('.kmt');
   var mc = document.createElement('canvas').getContext('2d');
+
+  /* EN färg, alla lager — #f0cc7b, i mix-blend-mode:overlay (satt i CSS
+     på hela .kmt). Strukturen (bredd/räckvidd/f) är oförändrad: breda
+     lager är korta och sitter bara vid nosen, det smala kärnlagret är
+     långt och bildar den synliga svansen. Se tidigare kommentar i denna
+     fil (git-historik) för hur det härleddes — inget gissat här. */
+  var KMT_FARG = [0xff,0xfa,0x66];   /* svansfärg — testas: #fffa66 (tidigare #f0cc7b) */
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  /* Sju lager i stället för tre — "blur genom superposition". Riktig
+     filter:blur går inte: ritas inte på iPhone (fälla 1 i 12:an) och
+     dödar mix-blend-mode på samma element (hard-don't i CLAUDE.md).
+     Mjukheten byggs i stället av tät breddgradering — samma anledning
+     som 12:ans eget recept har sju streck. `vit:true` = lagret är rent
+     vitt hela vägen (den heta spetsen), annars vit nos → #f0cc7b. */
+  /* Bredden på den LJUSA delen ska vara störst i huvudet (Anders) —
+     tidigare bar bara den svaga glöden huvudbredden medan kärnan löpte
+     konstant 8 enheter hela svansen och spetsen var SMALARE än kärnan.
+     Nu: ljusare mellanlager breda vid nosen, kärnan slimmad (tunn
+     svans), och spetsen BREDARE än kärnan så nosen är fetast. */
+  var KMT_LAGER = [
+    {w:26, l:5,  op:.12, f:1.1},            /* yttersta glöden */
+    {w:19, l:7,  op:.2,  f:.8},
+    {w:14, l:9,  op:.32, f:.55},
+    {w:11, l:12, op:.5,  f:.3},
+    {w:9,  l:15, op:.75, f:.12},            /* ljus, bred, tätt bakom nosen */
+    {w:6.5,l:18, op:1,   f:0},              /* kärnan — smal, längst svans */
+    {w:7,  l:4,  op:1,   f:0, vit:true}     /* het ren-vit spets, bredast ljus del */
+  ];
+  var KMT_KANT_PROC = 12;
+  var KMT_DVALJ_MS = 9500;
+  /* SOLSIDAN (Anders): en glint på skuggsidan av en bokstav motsäger
+     sidans underförstådda ljuskälla (halon och fyllningens ljusa topp =
+     ljus uppifrån, aningen vänster) och känns "fel i huvet". Ytnormalen
+     vid kometens nos räknas ur banans tangent varje bildruta och tonar
+     kometen med hur mycket kanten vetter mot ljuset — full styrka på
+     solsidan, släckt på skuggsidan. Vektorn pekar MOT solen:
+     45 grader uppifrån vänster (Anders). */
+  var KMT_SOL = {x:-.7071, y:-.7071};
+  var KMT_OCKL_N = 72;   /* ocklusions-samplen per kontur (delas av bygg + rita) */
+  /* Den godkända kometen, duplicerad MEDVETET: varje placering är en
+     kopia av samma objekt, med egen kontur, egen skala (hålet är smalt
+     — ~147 källenheter mot treans ~410 — så dess kopia skalas ner i
+     stället för att få originalbredderna, det var det som såg befängt
+     ut innan) och egen startfas så de inte ligger på samma ställe. */
+  var KMT_PLACERING = [
+    {kontur:0, skala:1, fas:0},       /* trean — två räcker, baksidan ska inte ha så mycket */
+    {kontur:0, skala:1, fas:.5},
+    {kontur:1, skala:1, fas:.45},     /* nollans yttring — två räcker */
+    {kontur:1, skala:1, fas:.95},
+    {kontur:2, skala:1, fas:.05},     /* nollans hål — mest kärlek: fem st */
+    {kontur:2, skala:1, fas:.25},
+    {kontur:2, skala:1, fas:.45},
+    {kontur:2, skala:1, fas:.65},
+    {kontur:2, skala:1, fas:.85}
+  ];
+  /* Ingen puls längre (Anders: "kanske inte ska köra random — utan bara
+     så snyggt det går"). Solsidan ÄR enveloppet: kometen kretsar
+     konstant och tänds/släcks mjukt av geometrin själv när den glider
+     in i och ut ur ljuset — deterministiskt och lugnt, som en fyr.
+     Fasförskjutningarna i KMT_PLACERING gör att glintarna avlöser
+     varandra i en jämn sekvens i stället för att blinka slumpvis. */
+  var kmtInstanser = null;
+  var kmtLast = 0, kmtRaf = 0;
+
+  function kmtFarg(rgb){ return 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')'; }
+  /* Illustrator exporterar en glyfs yttring och hål åt MOTSATT håll (så
+     fill-rule ger rätt hål) — samma dash-offset-formel skulle då få dem
+     att se ut att snurra åt olika håll. Räkna ut varje konturs egen
+     vridriktning via signerad yta (shoelace) och normalisera alla till
+     medsols. Verifierat tecken för tecken mot en enhetskvadrat i SVG:s
+     eget Y-ner-koordinatsystem, inte gissat: positiv summa = medsols. */
+  function kmtRiktning(path, len){
+    var N = 32, pts = [], i;
+    for(i=0;i<N;i++) pts.push(path.getPointAtLength(len*i/N));
+    var sum = 0;
+    for(i=0;i<N;i++){
+      var a = pts[i], b = pts[(i+1)%N];
+      sum += a.x*b.y - b.x*a.y;
+    }
+    return sum > 0 ? 1 : -1;
+  }
+
+  /* En klocka, i JS. En komet besöker konturerna i tur och ordning; med
+     fyra fasförskjutna instanser kan flera vara aktiva på OLIKA konturer
+     samtidigt. Nos/svans-punkterna räknas EXAKT ur samma dashoffset som
+     styr vad som är synligt (inte en separat uppskattning som kan glida
+     isär) — SVG:s dash-regel: en punkt vid s är synlig om
+     (s+offset) mod 100 ∈ [0,l), dvs fönstret är [g, g+l) där
+     g=(100-offset) mod 100. Fönstret glider mot STIGANDE g när
+     riktning>0 (nosen är då g+l) och mot SJUNKANDE g när riktning<0
+     (nosen är då g). */
+  function kometRita(nu){
+    kmtRaf = requestAnimationFrame(kometRita);
+    if(!kmtInstanser) return;
+    var dt = Math.min(80, kmtLast ? nu - kmtLast : 16); kmtLast = nu;
+    var rate = 100/KMT_DVALJ_MS;
+
+    kmtInstanser.forEach(function(inst){
+      /* Egen varvtid per komet (±30%), omlottad vid varje varvskarv —
+         skarven ligger i kant-fadens släckta zon så bytet är osynligt.
+         Olika perioder gör att ensemblens mönster aldrig upprepar sig
+         exakt (Anders: "randomness på hur de presenteras"), men varje
+         enskild komet rör sig fortfarande jämnt och lugnt. */
+      var nyP = inst.localP + rate*dt*inst.fart;
+      if(nyP >= 100) inst.fart = .75 + Math.random()*.6;
+      inst.localP = nyP % 100;
+
+      /* Ingen puls — solsidan är enveloppet (se kommentar vid
+         KMT_PLACERING). */
+      var puls = 1;
+
+      var kant = Math.min(inst.localP, 100-inst.localP) / KMT_KANT_PROC;
+      var kantFade = Math.max(0, Math.min(1, kant));
+      var len = inst.len, riktning = inst.riktning;
+
+      /* Solsidefaktorn: tangent samplad över ±1,5% av banan (slätare i
+         hörn än en punktderivata), normal = (dy,-dx) på den FÖRFATTADE
+         tangenten — typsnittens motsatta vridning på hål gör att den
+         då pekar bort från bläcket på både yttringar och hål, samma
+         formel. Smoothstep så övergången ljus/skugga andas i stället
+         för att klippa. */
+      var nPct = riktning > 0 ? inst.localP : (100 - inst.localP);
+      var nS = ((nPct/100*len) % len + len) % len;
+      var dS = len * .015;
+      var pA = inst.path.getPointAtLength(((nS-dS)%len+len)%len);
+      var pB = inst.path.getPointAtLength(((nS+dS)%len+len)%len);
+      var tx = pB.x-pA.x, ty = pB.y-pA.y;
+      var tl = Math.sqrt(tx*tx+ty*ty) || 1;
+      var nx = ty/tl, ny = -tx/tl;
+      var rDot = nx*KMT_SOL.x + ny*KMT_SOL.y;
+      /* Naturliga blänk (Anders: "vissa försvinner lite för fort"):
+         1) lyft — glinten lever kvar en bit förbi ljusgränsen (strykande
+         ljus) i stället för att dö exakt vid terminatorn, 2) tidsmässig
+         utjämning med ASYMMETRI: snabb tändning (~150ms), långsam
+         släckning (~450ms) — så tvära normalsvängar i skarpa kurvor
+         aldrig kan släcka en glint abrupt. */
+      var sol = Math.max(0, (rDot + .18) / 1.18);
+      /* Spekulär topp: blänket SVÄLLER när kanten passerar spegelvinkeln
+         mot 45°-solen och mattas däremellan — kometen svarar synligt på
+         ljuset i stället för att vara jämnt tänd över hela solsidan.
+         Exponenten styr spetsigheten (1 = brett, högre = snävare). */
+      sol = Math.pow(sol, 1.7);
+      sol = sol*sol*(3-2*sol);
+      /* Slagskugga: förberäknad ocklusion (se kometBygg) — i en konkav
+         ficka är kanten solvänd men skymd, då släcks glinten oavsett
+         normal. Linjär interpolation mellan samplen. */
+      if(inst.occl){
+        var oi = nPct/100*KMT_OCKL_N - .5;
+        var i0 = Math.floor(oi), fr = oi - i0;
+        var o0 = inst.occl[((i0 % KMT_OCKL_N)+KMT_OCKL_N)%KMT_OCKL_N];
+        var o1 = inst.occl[(((i0+1) % KMT_OCKL_N)+KMT_OCKL_N)%KMT_OCKL_N];
+        sol *= 1 - (o0 + (o1-o0)*fr);
+      }
+      if(inst.solVis === undefined) inst.solVis = sol;
+      /* Födelseflare (Anders: "större i bloom i början"): när en glint
+         TÄNDS (från släckt till lysande) sväller glödlagren ~60% och
+         sätter sig över ~650ms. Kärnan/spetsen sväller bara lätt. */
+      if(inst.solVis < .04 && sol > .1) inst.flare = 1;
+      inst.flare = Math.max(0, (inst.flare||0) - dt/650);
+      var tau = sol > inst.solVis ? 150 : 450;
+      inst.solVis += (sol - inst.solVis) * Math.min(1, dt/tau);
+      sol = inst.solVis;
+
+      /* Riktningsberoende offset — härledd, inte gissad. Ett dash-
+         fönster [g, g+l) adresseras via sin NEDRE s-kant: g=(100-offset)
+         mod 100. På en MEDSOLS kontur är fönstrets övre kant nosen, så
+         offset = l+f-localP ger alla lager samma nos (övre kant) med
+         svansar av olika längd bakåt. På en MOTURS kontur är det den
+         NEDRE kanten som är nosen — samma formel förankrar då i stället
+         alla lager i SVANSÄNDEN ("det eftersläpar saker i svansen").
+         Moturs-formeln offset = localP - f förankrar nosen gemensamt. */
+      function uppdStack(stack, faktor){
+        stack.forEach(function(lg){
+          var offset = riktning > 0 ? (lg.l + lg.f - inst.localP)
+                                    : (inst.localP - lg.f);
+          lg.el.style.strokeDashoffset = offset.toFixed(2);
+          lg.el.style.opacity = (kantFade*puls*faktor).toFixed(3);
+          if(lg.bw !== undefined && (inst.flare > .005 || lg.flareAktiv)){
+            var fl = 1 + inst.flare * (lg.glod ? .6 : .22);
+            lg.el.style.strokeWidth = (lg.bw * fl).toFixed(2);
+            lg.flareAktiv = inst.flare > .005;   /* en sista skrivning tillbaka till basbredd */
+          }
+          var g = (100 - offset) % 100; if(g<0) g += 100;
+          var gPlusL = (g + lg.l) % 100;
+          var nosPct  = riktning>0 ? gPlusL : g;
+          var svansPct = riktning>0 ? g : gPlusL;
+          var nosS = ((nosPct/100*len) % len + len) % len;
+          var svansS = ((svansPct/100*len) % len + len) % len;
+          var nos = inst.path.getPointAtLength(nosS);
+          var svans = inst.path.getPointAtLength(svansS);
+          lg.grad.setAttribute('x1', nos.x.toFixed(2));
+          lg.grad.setAttribute('y1', nos.y.toFixed(2));
+          lg.grad.setAttribute('x2', svans.x.toFixed(2));
+          lg.grad.setAttribute('y2', svans.y.toFixed(2));
+        });
+      }
+      uppdStack(inst.lager, sol);
+    });
+  }
+  var KMT_VIT = [255,255,255];
+  function kometBygg(){
+    if(!kmtEl) return;
+    var defs = kmtEl.querySelector('defs');
+    if(!defs){ defs = document.createElementNS(SVGNS,'defs'); kmtEl.insertBefore(defs, kmtEl.firstChild); }
+    /* BLOOM/GLOW — klassiska receptet: blurra en kopia av innehållet,
+       rita originalet skarpt ovanpå. Kärnan förblir het, glöden blöder
+       mjukt utåt. NATIVT SVG-filter (feGaussianBlur), inte CSS filter:
+       — det är CSS-filtret på SVG-barn som iPhone inte ritar (fälla 1 i
+       12:an), SVG:s egna filterprimitiv fungerar. Ligger på grupperna
+       INUTI svg:n, inte på .kmt själv, så mix-blend-mode:overlay på
+       .kmt överlever (filter+blend på SAMMA element dödar blenden —
+       hard-don't). Medveten kostnad: bluren räknas om per bildruta
+       (fälla 2) — men det är EN liten gauss på en numeral-stor yta,
+       inte sex staplade skuggor; flaggat och accepterat. */
+    var filt = document.createElementNS(SVGNS,'filter');
+    filt.setAttribute('id','kmtBloom');
+    filt.setAttribute('x','-30%'); filt.setAttribute('y','-30%');
+    filt.setAttribute('width','160%'); filt.setAttribute('height','160%');
+    var fb = document.createElementNS(SVGNS,'feGaussianBlur');
+    fb.setAttribute('stdDeviation','2.5');
+    fb.setAttribute('result','oskarpa');
+    filt.appendChild(fb);
+    var fm = document.createElementNS(SVGNS,'feMerge');
+    ['oskarpa','SourceGraphic'].forEach(function(inn){
+      var n = document.createElementNS(SVGNS,'feMergeNode');
+      n.setAttribute('in', inn);
+      fm.appendChild(n);
+    });
+    filt.appendChild(fm);
+    defs.appendChild(filt);
+    var grupper = kmtEl.querySelectorAll('.kc');
+    grupper.forEach(function(g){ g.setAttribute('filter','url(#kmtBloom)'); });
+    /* Mät varje kontur en gång; mallelementen renderar aldrig själva
+       (stroke:none) — varje placering klonar sina egna lager. */
+    var konturData = [];
+    grupper.forEach(function(g){
+      var mall = g.querySelector('.seg');
+      var len = mall.getTotalLength();
+      konturData.push({g:g, mall:mall, len:len, riktning:kmtRiktning(mall, len)});
+      mall.style.stroke = 'none';
+    });
+
+    /* SLAGSKUGGA/OCKLUSION, förberäknad — Anders: "det ska tex inte
+       synas på 3:ans nedersta innerkant" (och övre). Normal-mot-sol
+       räcker inte i KONKAVA fickor: kanten vetter mot solen men skyms
+       av glyfens egna överliggande delar. Eftersom både geometri och
+       sol (45°) är statiska räknas det EN gång vid bygget: för N
+       punkter per kontur kastas en stråle mot solen; träffar den bläck
+       (fyllningen av "3", eller "0"-yttringen minus hålet) är punkten
+       i slagskugga. isPointInFill kör i samma viewBox-koordinater som
+       path-datan. Grannmedelvärdad så gränsen inte trappar; saknas
+       API:t (äldre browser) blir allt oskuggat — graceful. */
+    (function(){
+      var p3 = konturData[0] && konturData[0].mall;
+      var p0y = konturData[1] && konturData[1].mall;
+      var p0h = konturData[2] && konturData[2].mall;
+      var kan = p3 && p3.isPointInFill && kmtEl.createSVGPoint;
+      var pt = kan ? kmtEl.createSVGPoint() : null;
+      function iBlack(x,y){
+        pt.x = x; pt.y = y;
+        if(p3.isPointInFill(pt)) return true;
+        if(p0y && p0y.isPointInFill(pt) && !(p0h && p0h.isPointInFill(pt))) return true;
+        return false;
+      }
+      konturData.forEach(function(kd){
+        var O = new Array(KMT_OCKL_N).fill(0);
+        if(kan){
+          for(var i=0;i<KMT_OCKL_N;i++){
+            var s = ((i+.5)/KMT_OCKL_N)*kd.len;
+            var p = kd.mall.getPointAtLength(s);
+            var dS = kd.len*.008;
+            var pA = kd.mall.getPointAtLength(((s-dS)%kd.len+kd.len)%kd.len);
+            var pB = kd.mall.getPointAtLength(((s+dS)%kd.len+kd.len)%kd.len);
+            var tx = pB.x-pA.x, ty = pB.y-pA.y;
+            var tl = Math.sqrt(tx*tx+ty*ty)||1;
+            var nx = ty/tl, ny = -tx/tl;
+            /* startpunkt strax UTANFÖR bläcket, sen marsch mot solen.
+               TRE strålar i liten solfjäder (±8°) och täta steg (14
+               enheter) — grova steg missade tunna överliggande armar
+               ("stryker suspekt under 3:ans tak", Anders) och en ensam
+               stråle kunde smita ut genom fickans öppning. Skymd om
+               NÅGON stråle träffar; felar hellre mot skugga. */
+            var sx = p.x + nx*4, sy = p.y + ny*4;
+            var traff = false;
+            for(var r=-1; r<=1 && !traff; r++){
+              var va = Math.atan2(KMT_SOL.y, KMT_SOL.x) + r*.14;
+              var rx = Math.cos(va), ry = Math.sin(va);
+              for(var j=1; j<=30; j++){
+                if(iBlack(sx + rx*14*j, sy + ry*14*j)){ traff = true; break; }
+              }
+            }
+            if(traff) O[i]=1;
+          }
+          /* grannmedelvärde, ett pass */
+          var O2 = O.slice();
+          for(var k=0;k<KMT_OCKL_N;k++){
+            O2[k] = (O[(k-1+KMT_OCKL_N)%KMT_OCKL_N] + 2*O[k] + O[(k+1)%KMT_OCKL_N]) / 4;
+          }
+          O = O2;
+        }
+        kd.occl = O;
+      });
+    })();
+    kmtInstanser = [];
+    var gid = 0;
+    KMT_PLACERING.forEach(function(pl){
+      var kd = konturData[pl.kontur];
+      /* Svanslängd (l) och nos-offset (f) anges i PROCENT av konturens
+         omkrets — men hålets omkrets är mycket kortare än treans, så
+         samma procent gav korta, knubbiga streck i verkliga mått som
+         separerade till "ett släp av punkter" (Anders). Normalisera mot
+         referenskonturen (trean): samma VERKLIGA svanslängd överallt.
+         Tak vid 60% så kometen aldrig täcker mer än drygt halva en
+         liten kontur. */
+      var skalaL = Math.min((konturData[0].len / kd.len) * pl.skala, 60/18);
+      var lager = [];
+      for(var lg=0; lg<KMT_LAGER.length; lg++){
+        var def = KMT_LAGER[lg];
+        var el = kd.mall.cloneNode(false);
+        kd.g.appendChild(el);
+        var id = 'kmtg'+(gid++);
+        var grad = document.createElementNS(SVGNS,'linearGradient');
+        grad.setAttribute('id', id);
+        grad.setAttribute('gradientUnits','userSpaceOnUse');
+        /* VIT nos → #f0cc7b svans. Vitt håller i sig ordentligt (0-18%,
+           Anders: "ännu mer av huvudet vitt") innan det glider via cream
+           till färgen. MÅNGA stopp med flit: overlay förstärker mellan-
+           tonskontrast, så en gles ramp bandar synligt ("pixligt"). */
+        [[0,KMT_VIT,def.op],[18,KMT_VIT,def.op*.96],[28,[255,252,200],def.op*.78],
+         [38,[255,250,160],def.op*.58],[48,KMT_FARG,def.op*.42],[60,KMT_FARG,def.op*.3],
+         [72,KMT_FARG,def.op*.18],[84,KMT_FARG,def.op*.08],[100,KMT_FARG,0]
+        ].forEach(function(s){
+          var st = document.createElementNS(SVGNS,'stop');
+          st.setAttribute('offset', s[0]+'%');
+          st.setAttribute('stop-color', kmtFarg(def.vit ? KMT_VIT : s[1]));
+          st.setAttribute('stop-opacity', s[2]);
+          grad.appendChild(st);
+        });
+        defs.appendChild(grad);
+        el.style.stroke = 'url(#'+id+')';
+        el.style.strokeWidth = (def.w * pl.skala).toFixed(2);
+        var lU = def.l * skalaL, fU = def.f * skalaL;
+        el.style.strokeDasharray = lU.toFixed(2)+' '+(100-lU).toFixed(2);
+        el.style.opacity = 0;
+        lager.push({el:el, grad:grad, l:lU, f:fU,
+          bw: def.w * pl.skala, glod: lg < 5});
+      }
+      kmtInstanser.push({lager:lager, path:kd.mall, len:kd.len,
+        riktning:kd.riktning, localP: pl.fas*100,
+        occl: kd.occl, fart: .75 + Math.random()*.6});
+    });
+  }
+  kometBygg();
+  if(kmtEl && window.IntersectionObserver){
+    new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita); }
+        else if(kmtRaf){ cancelAnimationFrame(kmtRaf); kmtRaf = 0; }
+      });
+    }, {rootMargin:'100px'}).observe(kmtEl);
+  }
 
   function inkOf(el, txt){
     var cs = getComputedStyle(el);
@@ -1526,64 +1885,21 @@ section{padding-block:var(--section);position:relative}
       + (nmm.actualBoundingBoxRight - nmm.actualBoundingBoxLeft)/2
       - nmm.actualBoundingBoxLeft;
 
-    /* konturkometen: samma baslinje och mitt som HTML-texten */
-    if(olEl){
-      /* INGEN viewBox. Sätts den ur en mätning och elementet sedan
-         ändrar bredd skalar webbläsaren upp hela ritningen — fälla 9 i
-         komet-anteckningarna. Utan viewBox är användarenheterna samma
-         som pixlar och inget kan skala fel.
-
-         Ytan får DESSUTOM marginal utåt. Ligger svg-ytan kant i kant med
-         texten hamnar strecket och dess glöd precis på kanten och kapas
-         där — syns tydligast på nollans högersida. overflow:visible
-         räcker inte alltid; ge den plats i stället. */
-      var pad = Math.round(num.asc * 0.14);
-      olEl.style.inset = (-pad)+'px';
-      var ts = olEl.querySelectorAll('text');
-      /* Ingen centrering, ingen modell. text-anchor:middle centrerar
-         FRAMRYCKNINGSBREDDEN, inte bläcket — med negativ spärr är det
-         inte samma punkt, och konturen hamnade upp till vänster.
-         Sätt i stället samma startpunkt och samma baslinje som
-         HTML-texten faktiskt har. Två mätvärden, noll antaganden. */
-      for(var i=0;i<ts.length;i++){
-        ts[i].setAttribute('text-anchor','start');
-        ts[i].setAttribute('x', (num.box.left - wr.left + pad).toFixed(2));
-        ts[i].setAttribute('y', (num.baseline - wr.top + pad).toFixed(2));
-      }
-      /* konturlängden är inte känd i förväg — mät den på plats och sätt
-         streck och varv i px. pathLength finns inte på <text>. */
-      var len = 0;
-      try { len = ts[0].getComputedTextLength ? 0 : 0; } catch(e){}
-      var cap = num.asc;
-      /* Varvet måste matcha KONTURENS längd, inte gissas stort. Är
-         mellanrummet längre än konturen hamnar strecket i gapet och
-         kometen är osynlig större delen av cykeln. En siffras yttre
-         kontur är grovt 2*(versalhöjd + bredd) ~ 3,2 x versalhöjden. */
-      var run = Math.round(cap * 3.2);
-      /* Tre segment i fallande styrka. Ett längre streck skulle sticka ut
-         FRAMFÖR kärnan, eftersom dashen ritas framåt från sin offset. För
-         att det ska släpa efter i stället fasförskjuts varje lager i tid:
-         att halka L pixlar motsvarar dur * L/varv. */
-      var dur = 7.5;
-      /* Två lager i stället för tre. Kärnan tunnare, svansen dras ut långt
-         och tapras nästan bort — bredden går mot 0 i stället för att
-         hålla samma tjocklek hela vägen ut. */
-      var seg = [
-        {el:ts[1], len:Math.max(9,  cap*.17), w:Math.max(0.8, cap*.012)},  /* kärna */
-        {el:ts[0], len:Math.max(110,cap*3.1), w:Math.max(0.25,cap*.0035)}  /* svans */
-      ];
-      for(var q=0;q<seg.length;q++){
-        var L = Math.round(seg[q].len);
-        seg[q].el.style.strokeDasharray = L+' '+run;
-        seg[q].el.style.strokeWidth = seg[q].w.toFixed(2);
-        var lag = L - Math.round(seg[0].len);          /* hur långt bakom kärnan */
-        var d = -(dur * (1 - (lag % run)/run));
-        seg[q].el.style.animationDelay = d.toFixed(3)+'s';
-      }
-      olEl.style.setProperty('--oldur', dur+'s');
-      olEl.style.setProperty('--olrun', (-run)+'px');
-      olEl.style.setProperty('--olglow', (cap*0.09).toFixed(1)+'px');
-      olEl.style.setProperty('--olglow-s', (cap*0.026).toFixed(1)+'px');
+    /* Kometens svg-box läggs exakt över textens bläck-yta — bläck-boxen
+       i BÅDA led (inte radboxen, som räknar med typsnittets egen luft
+       och gav ett synligt sidledes offset innan). actualBoundingBoxLeft
+       är NEGATIV när bläcket börjar till höger om ursprungspunkten
+       (verifierat i webbläsare, samma tecken som inkMitt2 ovan). */
+    if(kmtEl && kmtInstanser){
+      var inkLeft = num.box.left - nmm.actualBoundingBoxLeft;
+      var inkTop  = num.baseline - num.asc;
+      var inkW    = nmm.actualBoundingBoxLeft + nmm.actualBoundingBoxRight;
+      var inkH    = num.asc + num.desc;
+      kmtEl.style.left   = (inkLeft - wr.left).toFixed(2)+'px';
+      kmtEl.style.top    = (inkTop  - wr.top ).toFixed(2)+'px';
+      kmtEl.style.width  = inkW.toFixed(2)+'px';
+      kmtEl.style.height = inkH.toFixed(2)+'px';
+      if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
     }
 
     /* SKÖLDEN — exakt mått, exakt mitt.
