@@ -1991,42 +1991,22 @@ section{padding-block:var(--section);position:relative}
       + (nmm.actualBoundingBoxRight - nmm.actualBoundingBoxLeft)/2
       - nmm.actualBoundingBoxLeft;
 
-    /* Kometens svg-box läggs exakt över textens bläck-yta — bläck-boxen
-       i BÅDA led (inte radboxen, som räknar med typsnittets egen luft
-       och gav ett synligt sidledes offset innan). actualBoundingBoxLeft
-       är NEGATIV när bläcket börjar till höger om ursprungspunkten
-       (verifierat i webbläsare, samma tecken som inkMitt2 ovan). */
+    /* Kometens svg-box: REN ARITMETIK på radboxen + fasta em-konstanter,
+       frysta ur den godkända desktop-placeringen (Chrome, verifierad av
+       Anders). Ingen canvas- eller getBBox-mätning i runtime alls —
+       de gav olika svar i olika motorer (Safari: aBL=0 där Chrome ger
+       ~-0.03em; Safaris <text>.getBBox ger em-boxen, inte bläcket) och
+       kometerna hamnade "lite offset vänster" på iPhone: exakt den
+       0,03em-spalt som Safari-mätningen tappade. Radboxen är däremot
+       identisk mellan motorerna (0,807em bred, verifierat mot iPhone-
+       debugvärden), så konstanterna överför exakt. */
     if(kmtEl && kmtInstanser){
-      var inkLeft = num.box.left - nmm.actualBoundingBoxLeft;
-      var inkTop  = num.baseline - num.asc;
-      var inkW    = nmm.actualBoundingBoxLeft + nmm.actualBoundingBoxRight;
-      var inkH    = num.asc + num.desc;
-      kmtEl.style.left   = (inkLeft - wr.left).toFixed(2)+'px';
-      kmtEl.style.top    = (inkTop  - wr.top ).toFixed(2)+'px';
-      kmtEl.style.width  = inkW.toFixed(2)+'px';
-      kmtEl.style.height = inkH.toFixed(2)+'px';
+      var kmtF = parseFloat(getComputedStyle(numEl).fontSize);
+      kmtEl.style.left   = (num.box.left + .03*kmtF   - wr.left).toFixed(2)+'px';
+      kmtEl.style.top    = (num.box.top  + .3564*kmtF - wr.top ).toFixed(2)+'px';
+      kmtEl.style.width  = (.716*kmtF).toFixed(2)+'px';
+      kmtEl.style.height = (.716*kmtF).toFixed(2)+'px';
       if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
-
-      /* TEMP: ?kmtdebug=1 — råvärden ur mätningen for enhetsjämförelse. */
-      if(location.search.indexOf('kmtdebug') !== -1){
-        kmtEl.style.outline = '2px solid red';
-        var dbg = document.getElementById('kmtdbg');
-        if(!dbg){
-          dbg = document.createElement('pre');
-          dbg.id='kmtdbg';
-          dbg.style.cssText='position:fixed;left:4px;top:4px;z-index:9999;background:rgba(0,0,0,.85);color:#0f0;font:10px monospace;padding:6px;white-space:pre-wrap;max-width:96vw;pointer-events:none';
-          document.body.appendChild(dbg);
-        }
-        var pcs2 = getComputedStyle(numEl);
-        dbg.textContent = JSON.stringify({
-          aBL:+nmm.actualBoundingBoxLeft.toFixed(1), aBR:+nmm.actualBoundingBoxRight.toFixed(1),
-          asc:+num.asc.toFixed(1), desc:+num.desc.toFixed(1),
-          baseline:+num.baseline.toFixed(1),
-          box:{l:+num.box.left.toFixed(1),t:+num.box.top.toFixed(1),w:+num.box.width.toFixed(1),h:+num.box.height.toFixed(1)},
-          ut:{l:+inkLeft.toFixed(1),t:+inkTop.toFixed(1),w:+inkW.toFixed(1),h:+inkH.toFixed(1)},
-          font:pcs2.fontSize+' / '+pcs2.letterSpacing+' / '+pcs2.fontFamily.split(',')[0]
-        });
-      }
     }
 
     /* SKÖLDEN — exakt mått, exakt mitt.
