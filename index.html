@@ -923,6 +923,14 @@ section{padding-block:var(--section);position:relative}
     padding:clamp(28px,6vh,60px) var(--pad) clamp(56px,9vh,90px)}
   .foot-band{font-size:calc(var(--u)*2.5);max-width:16ch}
 }
+/* Byråkredit längst ner — gul spärrad versaltext flankerar Adeprimos
+   vita ordmärke, som i Anders skiss. */
+.foot-credit{display:flex;align-items:center;justify-content:center;gap:14px;
+  margin:clamp(28px,4vh,48px) 0 0;font-family:var(--font-display);font-weight:700;
+  font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.foot-credit img{display:block;height:17px;width:auto;opacity:.95}
+.foot-credit a{display:block;line-height:0}
+
 .foot-meta{position:absolute;z-index:3;left:var(--pad);right:var(--pad);
   bottom:clamp(12px,2vw,26px);display:flex;justify-content:space-between;gap:var(--sp-3);
   font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
@@ -1433,6 +1441,13 @@ section{padding-block:var(--section);position:relative}
         </a>
       </div>
     </div>
+
+    <p class="foot-credit">
+      <span>Vi tackar</span>
+      <a href="https://adeprimo.se" target="_blank" rel="noopener"><img
+        src="img/adeprimo-white.png" alt="Adeprimo" width="810" height="200"></a>
+      <span>för hjälpen med denna sida</span>
+    </p>
 
     <div class="foot-meta">
       <span>Östersunds FK · 1996—2026</span>
