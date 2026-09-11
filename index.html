@@ -822,7 +822,7 @@ section{padding-block:var(--section);position:relative}
 .tl-year{align-self:baseline}
 /* Bilden driver i egen takt precis som brickorna i kollaget. */
 .tl-bild{margin:0;align-self:center}
-.tl-bild img{width:100%;height:clamp(88px,9.5vw,140px);object-fit:cover;
+.tl-bild img,.tl-bild video{width:100%;height:clamp(88px,9.5vw,140px);object-fit:cover;
   border-radius:var(--r-sm);box-shadow:0 14px 34px rgba(0,0,0,.55);
   will-change:transform,opacity}
 .tl-bild figcaption{margin-top:7px;font-size:11px;line-height:1.4;
@@ -845,7 +845,7 @@ section{padding-block:var(--section);position:relative}
   .tl{grid-template-columns:clamp(80px,14vw,120px) minmax(0,1fr);
     gap:var(--sp-3) clamp(16px,3vw,32px)}
   .tl-bild{grid-column:2;margin-top:var(--sp-3)}
-  .tl-bild img{height:clamp(120px,26vw,170px)}
+  .tl-bild img,.tl-bild video{height:clamp(120px,26vw,170px)}
 }
 @media(max-width:600px){
   .tl{grid-template-columns:1fr;gap:var(--sp-2)}
@@ -1164,8 +1164,8 @@ section{padding-block:var(--section);position:relative}
             Frösö IF ansluter till konceptet samma år, Fältjägarnas IF år 2000.</p>
         </div>
               <figure class="tl-bild">
-          <img data-speed=".15" data-drop="150" src="img/arena-staplats.jpg" alt="Publiken på Jämtkraft Arena">
-          <figcaption>Publiken. Norra ståplats.</figcaption>
+          <img data-speed=".15" data-drop="150" src="img/arkiv-ofk-15-olle.jpg" alt="Matchbild från Hofvallen-åren">
+          <figcaption>Hofvallen-åren. Löparbana runt planen.</figcaption>
         </figure>
       </li>
       <li class="tl reveal">
@@ -1176,8 +1176,8 @@ section{padding-block:var(--section);position:relative}
             sexton år efter att drömmen formulerades.</p>
         </div>
               <figure class="tl-bild">
-          <img data-speed=".10" data-drop="130" src="img/arena-alaktaren.jpg" alt="A-läktaren">
-          <figcaption>A-läktaren en matchdag.</figcaption>
+          <img data-speed=".10" data-drop="130" src="img/arkiv-seriesegersiriusborta031.jpg" alt="Spelarna firar borta mot Sirius">
+          <figcaption>Firandet, borta mot Sirius.</figcaption>
         </figure>
       </li>
       <li class="tl reveal">
@@ -1188,8 +1188,8 @@ section{padding-block:var(--section);position:relative}
             lag i högsta serien.</p>
         </div>
               <figure class="tl-bild">
-          <img data-speed=".19" data-drop="170" src="img/arena-match-2016.jpg" alt="Jämtkraft Arena under match 2016">
-          <figcaption>Jämtkraft Arena, augusti 2016.</figcaption>
+          <img data-speed=".19" data-drop="170" src="img/arkiv-graham-sjunger-jamtlandssangen-2016.jpg" alt="Graham Potter sjunger Jämtlandssången, 2016">
+          <figcaption>Graham Potter sjunger Jämtlandssången, 2016.</figcaption>
         </figure>
       </li>
       <li class="tl reveal">
@@ -1200,8 +1200,9 @@ section{padding-block:var(--section);position:relative}
             till Europa.</p>
         </div>
               <figure class="tl-bild">
-          <img data-speed=".12" data-drop="140" src="img/potter-arena.jpg" alt="Tränaren 2017">
-          <figcaption>Tränaren på Jämtkraft Arena, 2017.</figcaption>
+          <video data-speed=".12" data-drop="140" data-lat="media/svenska-cupen-v2.mp4"
+            muted loop playsinline preload="none" aria-label="Svenska Cupen-firandet 2017"></video>
+          <figcaption>Svenska Cupen, 2017.</figcaption>
         </figure>
       </li>
       <li class="tl reveal">
@@ -1212,8 +1213,8 @@ section{padding-block:var(--section);position:relative}
             matchen med 2–1. Ett lag från Jämtland, i norra Europas fotbollsmedvetande.</p>
         </div>
               <figure class="tl-bild">
-          <img data-speed=".17" data-drop="160" src="img/arena-drone.jpg" alt="Jämtkraft Arena ovanifrån">
-          <figcaption>Hemmaplanen ovanifrån.</figcaption>
+          <img data-speed=".17" data-drop="160" src="img/arkiv-emirates.jpg" alt="Läktaren på Emirates Stadium, 2018">
+          <figcaption>Emirates Stadium, 22 februari 2018.</figcaption>
         </figure>
       </li>
           </ul>
@@ -1495,6 +1496,95 @@ section{padding-block:var(--section);position:relative}
      Två saker gissas aldrig: var trettians bläck faktiskt sitter i sin
      radbox, och hur årtalen ska ligga för att centrera optiskt mot den.
      Båda mäts i canvas ur de FAKTISKA typsnitten, efter att de laddats. */
+
+  /* ---- collaget slumpas ur arkivpoolen -------------------------------------
+     51 riktiga arkivbilder (granskade — noll AI, "AI fanns inte då").
+     Varje sidladdning blandar poolen och ger de 16 rutorna varsin unik
+     bild — sajten ser olika ut varje gång. De hårdkodade src:arna i
+     HTML:en ligger kvar som no-JS-fallback. Körs FÖRE reveal så inga
+     dubbelladdningar hinner synas. */
+  var ARKIV = [
+    {f:'arkiv-6q8e8448.jpg',a:'6Q8E8448'},
+    {f:'arkiv-bjorkebaum-2010.jpg',a:'Björkebaum 2010'},
+    {f:'arkiv-bobbo-s-2010.jpg',a:'Bobbo S 2010'},
+    {f:'arkiv-brian-wake-2011.jpg',a:'Brian Wake 2011'},
+    {f:'arkiv-dm-16-32107.jpg',a:'DM 16 32107'},
+    {f:'arkiv-emir-smajlic-ofk-steget-fore.jpg',a:'Emir Smajlic ÖFK steget före'},
+    {f:'arkiv-flytten-av-ungdomens-hus-2011.jpg',a:'Flytten av Ungdomens Hus 2011'},
+    {f:'arkiv-forward-borta-2012.jpg',a:'Forward borta 2012'},
+    {f:'arkiv-graham-i-ofkdress.jpg',a:'Graham i ÖFKdress'},
+    {f:'arkiv-graham-i-svansjon-2015.jpg',a:'Graham i Svansjön 2015'},
+    {f:'arkiv-graham-kor-hundspann.jpg',a:'Graham kör hundspann'},
+    {f:'arkiv-graham-sjunger-jamtlandssangen-2016.jpg',a:'Graham sjunger Jämtlandssången 2016'},
+    {f:'arkiv-herrboll1.jpg',a:'Herrboll1'},
+    {f:'arkiv-herrboll2.jpg',a:'Herrboll2'},
+    {f:'arkiv-isaac2012.jpg',a:'Isaac2012'},
+    {f:'arkiv-karin-lasse-chimamanda.jpg',a:'Karin Lasse Chimamanda'},
+    {f:'arkiv-kindberg.jpg',a:'Kindberg'},
+    {f:'arkiv-lee-makel-2010.jpg',a:'Lee Makel 2010'},
+    {f:'arkiv-martin-johansson-2010.jpg',a:'Martin Johansson 2010'},
+    {f:'arkiv-ofk-pite-82-olle.jpg',a:'OFK-PITE 82 OLLE.'},
+    {f:'arkiv-ofk-02.jpg',a:'ÖFK 02'},
+    {f:'arkiv-ofk-053-27089.jpg',a:'ÖFK 053 27089'},
+    {f:'arkiv-ofk-096-70437.jpg',a:'ÖFK 096 70437'},
+    {f:'arkiv-ofk-1-olle.jpg',a:'ÖFK 1 OLLE'},
+    {f:'arkiv-ofk-116.jpg',a:'ÖFK 116'},
+    {f:'arkiv-ofk-143.jpg',a:'ÖFK 143'},
+    {f:'arkiv-ofk-15-olle.jpg',a:'ÖFK 15 OLLE'},
+    {f:'arkiv-ofk-165-95502.jpg',a:'ÖFK 165 95502'},
+    {f:'arkiv-ofk-20-olle.jpg',a:'ÖFK 20 OLLE'},
+    {f:'arkiv-ofk-34-2906.jpg',a:'ÖFK 34 2906'},
+    {f:'arkiv-ofk-boden-359.jpg',a:'ÖFK-Boden 359'},
+    {f:'arkiv-ofk-lulea-09-olle.jpg',a:'ÖFK-Luleå 09 OLLE'},
+    {f:'arkiv-seriesegersiriusborta031.jpg',a:'SeriesegerSiriusborta031'},
+    {f:'arkiv-solleftea-borta-2011.jpg',a:'Sollefteå borta 2011'},
+    {f:'arkiv-tom-hakan.jpg',a:'Tom Håkan'},
+    {f:'arkiv-trangt-2.jpg',a:'Trångt-2'},
+    {f:'arkiv-cirkusgolv-2010.jpg',a:'cirkusgolv 2010'},
+    {f:'arkiv-petter.jpg',a:'petter'},
+    {f:'arkiv-widgren.jpg',a:'widgren'},
+    {f:'arkiv-xlibris-ofk-104.jpg',a:'xlibris ÖFK 104'},
+    {f:'arkiv-xlibris-ofk-093.jpg',a:'xlibris ÖFK 093'},
+    {f:'arkiv-xlibris-ofk-119.jpg',a:'xlibris ÖFK 119'},
+    {f:'arkiv-xlibris-ofk-143.jpg',a:'xlibris ÖFK 143'},
+    {f:'arkiv-xlibris-ofk-170.jpg',a:'xlibris ÖFK 170'},
+    {f:'arkiv-xlibris-ofk-202.jpg',a:'xlibris ÖFK 202'},
+    {f:'arkiv-xlibris-ofk-392.jpg',a:'xlibris ÖFK 392'},
+    {f:'arkiv-xlibris-ofk-ope-168.jpg',a:'xlibris ÖFK-OPE 168'},
+    {f:'arkiv-xlibris-ofk-ope-217.jpg',a:'xlibris ÖFK-OPE 217'},
+    {f:'arkiv-xlibris-wigam-194.jpg',a:'xlibris Wigam 194'},
+    {f:'arkiv-xlibris-q8e2306.jpg',a:'xlibris Q8E2306'},
+    {f:'arkiv-xlibris-q8e2430.jpg',a:'xlibris Q8E2430'}
+  ];
+  (function(){
+    var rutor = document.querySelectorAll('.collage .tile img');
+    if(!rutor.length) return;
+    var pool = ARKIV.slice();
+    for(var i=pool.length-1; i>0; i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    }
+    rutor.forEach(function(img, i){
+      var b = pool[i % pool.length];
+      img.src = 'img/' + b.f;
+      img.alt = b.a;
+    });
+  })();
+
+  /* Lata videor: laddas och spelas först i vy, pausas utanför —
+     samma ekonomiregel som marquee-videon. */
+  document.querySelectorAll('video[data-lat]').forEach(function(v){
+    if(!window.IntersectionObserver){ v.src = v.dataset.lat; v.play(); return; }
+    new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){
+          if(!v.src){ v.src = v.dataset.lat; v.load(); }
+          var pp = v.play(); if(pp && pp.catch) pp.catch(function(){});
+        } else if(v.src){ v.pause(); }
+      });
+    }, {rootMargin:'200px 0px'}).observe(v);
+  });
+
   var wrap = document.querySelector('.thirty .numwrap');
   var numEl = wrap && wrap.querySelector('.num');
   var kmtEl = wrap && wrap.querySelector('.kmt');
@@ -1786,7 +1876,13 @@ section{padding-block:var(--section);position:relative}
             for(var r=-1; r<=1 && !traff; r++){
               var va = Math.atan2(KMT_SOL.y, KMT_SOL.x) + r*.14;
               var rx = Math.cos(va), ry = Math.sin(va);
-              for(var j=1; j<=30; j++){
+              /* KORT räckvidd (126 enheter) med flit: siffran är en
+                 präglad 3D-yta, ljuset kommer snett ovanifrån sidplanet
+                 — en vägg skuggas bara av NÄRA överhäng (reliefdjupet).
+                 Full räckvidd gjorde nollans slutna hål helt skuggat
+                 (varje stråle träffar ju ringen någonstans) och släckte
+                 högra innerväggens blänk (Anders). */
+              for(var j=1; j<=9; j++){
                 if(iBlack(sx + rx*14*j, sy + ry*14*j)){ traff = true; break; }
               }
             }
