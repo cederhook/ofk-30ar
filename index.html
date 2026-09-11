@@ -2003,7 +2003,10 @@ section{padding-block:var(--section);position:relative}
       if(!kmtProbe){
         var ps = document.createElementNS(SVGNS,'svg');
         ps.setAttribute('aria-hidden','true');
-        ps.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
+        /* INTE 0x0: Safari kan ge fel getBBox för text i en nollstor
+           svg. 10x10 + visibility:hidden är säkert överallt. */
+        ps.setAttribute('width','10'); ps.setAttribute('height','10');
+        ps.style.cssText = 'position:absolute;left:-9999px;top:0;overflow:visible;visibility:hidden;pointer-events:none';
         kmtProbe = document.createElementNS(SVGNS,'text');
         kmtProbe.setAttribute('x','0'); kmtProbe.setAttribute('y','0');
         kmtProbe.textContent = '30';
@@ -2011,15 +2014,30 @@ section{padding-block:var(--section);position:relative}
         wrap.appendChild(ps);
       }
       var pcs = getComputedStyle(numEl);
-      kmtProbe.style.font = pcs.fontStyle+' '+pcs.fontWeight+' '+pcs.fontSize+' '+pcs.fontFamily;
+      /* Enskilda egenskaper, INTE font-shorthand — Safari ignorerar
+         ibland shorthand på SVG-text. */
+      kmtProbe.style.fontFamily = pcs.fontFamily;
+      kmtProbe.style.fontSize   = pcs.fontSize;
+      kmtProbe.style.fontWeight = pcs.fontWeight;
+      kmtProbe.style.fontStyle  = pcs.fontStyle;
       kmtProbe.style.letterSpacing = pcs.letterSpacing;
       var bb = kmtProbe.getBBox();
-      /* Probens origo (x=0, baslinje y=0) motsvarar radboxens vänster-
-         kant + den uppmätta baslinjen i DOM:en. */
-      kmtEl.style.left   = (num.box.left + bb.x - wr.left).toFixed(2)+'px';
-      kmtEl.style.top    = (num.baseline + bb.y - wr.top).toFixed(2)+'px';
-      kmtEl.style.width  = bb.width.toFixed(2)+'px';
-      kmtEl.style.height = bb.height.toFixed(2)+'px';
+      /* Vettighetskontroll: ser bbox:en trasig ut (Safari-egenheter,
+         typsnitt ej laddat) — fall tillbaka på radboxen + bläckhöjden
+         ur canvas-mätningen i stället för att placera fel. */
+      var rimlig = bb && bb.width > num.box.width*.5 && bb.width < num.box.width*1.6
+                   && bb.height > 0;
+      if(rimlig){
+        kmtEl.style.left   = (num.box.left + bb.x - wr.left).toFixed(2)+'px';
+        kmtEl.style.top    = (num.baseline + bb.y - wr.top).toFixed(2)+'px';
+        kmtEl.style.width  = bb.width.toFixed(2)+'px';
+        kmtEl.style.height = bb.height.toFixed(2)+'px';
+      } else {
+        kmtEl.style.left   = (num.box.left - wr.left).toFixed(2)+'px';
+        kmtEl.style.top    = (num.baseline - num.asc - wr.top).toFixed(2)+'px';
+        kmtEl.style.width  = num.box.width.toFixed(2)+'px';
+        kmtEl.style.height = (num.asc + num.desc).toFixed(2)+'px';
+      }
       if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
     }
 
