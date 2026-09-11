@@ -2006,6 +2006,27 @@ section{padding-block:var(--section);position:relative}
       kmtEl.style.width  = inkW.toFixed(2)+'px';
       kmtEl.style.height = inkH.toFixed(2)+'px';
       if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
+
+      /* TEMP: ?kmtdebug=1 — råvärden ur mätningen for enhetsjämförelse. */
+      if(location.search.indexOf('kmtdebug') !== -1){
+        kmtEl.style.outline = '2px solid red';
+        var dbg = document.getElementById('kmtdbg');
+        if(!dbg){
+          dbg = document.createElement('pre');
+          dbg.id='kmtdbg';
+          dbg.style.cssText='position:fixed;left:4px;top:4px;z-index:9999;background:rgba(0,0,0,.85);color:#0f0;font:10px monospace;padding:6px;white-space:pre-wrap;max-width:96vw;pointer-events:none';
+          document.body.appendChild(dbg);
+        }
+        var pcs2 = getComputedStyle(numEl);
+        dbg.textContent = JSON.stringify({
+          aBL:+nmm.actualBoundingBoxLeft.toFixed(1), aBR:+nmm.actualBoundingBoxRight.toFixed(1),
+          asc:+num.asc.toFixed(1), desc:+num.desc.toFixed(1),
+          baseline:+num.baseline.toFixed(1),
+          box:{l:+num.box.left.toFixed(1),t:+num.box.top.toFixed(1),w:+num.box.width.toFixed(1),h:+num.box.height.toFixed(1)},
+          ut:{l:+inkLeft.toFixed(1),t:+inkTop.toFixed(1),w:+inkW.toFixed(1),h:+inkH.toFixed(1)},
+          font:pcs2.fontSize+' / '+pcs2.letterSpacing+' / '+pcs2.fontFamily.split(',')[0]
+        });
+      }
     }
 
     /* SKÖLDEN — exakt mått, exakt mitt.
