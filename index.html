@@ -2039,6 +2039,33 @@ section{padding-block:var(--section);position:relative}
         kmtEl.style.height = (num.asc + num.desc).toFixed(2)+'px';
       }
       if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
+
+      /* TEMP: ?kmtdebug=1 — röd ram där kometlagret ligger + mätvärden,
+         för felsökning på riktiga enheter (Safari-mobil). Tas bort när
+         placeringen är verifierad. */
+      if(location.search.indexOf('kmtdebug') !== -1){
+        kmtEl.style.outline = '2px solid red';
+        var dbg = document.getElementById('kmtdbg');
+        if(!dbg){
+          dbg = document.createElement('pre');
+          dbg.id = 'kmtdbg';
+          dbg.style.cssText = 'position:fixed;left:4px;top:4px;z-index:9999;'+
+            'background:rgba(0,0,0,.85);color:#0f0;font:10px monospace;'+
+            'padding:6px;white-space:pre-wrap;max-width:96vw;pointer-events:none';
+          document.body.appendChild(dbg);
+        }
+        dbg.textContent = JSON.stringify({
+          rimlig: rimlig,
+          bb: bb ? {x:+bb.x.toFixed(1), y:+bb.y.toFixed(1),
+                    w:+bb.width.toFixed(1), h:+bb.height.toFixed(1)} : null,
+          numBox: {l:+num.box.left.toFixed(1), t:+num.box.top.toFixed(1),
+                   w:+num.box.width.toFixed(1), h:+num.box.height.toFixed(1)},
+          baseline:+num.baseline.toFixed(1), asc:+(num.asc||0).toFixed(1),
+          desc:+(num.desc||0).toFixed(1),
+          font: pcs.fontSize+' / '+pcs.letterSpacing,
+          fam: pcs.fontFamily.split(',')[0]
+        });
+      }
     }
 
     /* SKÖLDEN — exakt mått, exakt mitt.
