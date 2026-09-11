@@ -1660,7 +1660,7 @@ section{padding-block:var(--section);position:relative}
      in i och ut ur ljuset — deterministiskt och lugnt, som en fyr.
      Fasförskjutningarna i KMT_PLACERING gör att glintarna avlöser
      varandra i en jämn sekvens i stället för att blinka slumpvis. */
-  var kmtInstanser = null, kmtProbe = null;
+  var kmtInstanser = null;
   var kmtLast = 0, kmtRaf = 0;
 
   function kmtFarg(rgb){ return 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')'; }
@@ -1991,35 +1991,20 @@ section{padding-block:var(--section);position:relative}
       + (nmm.actualBoundingBoxRight - nmm.actualBoundingBoxLeft)/2
       - nmm.actualBoundingBoxLeft;
 
-    /* Kometens svg-box läggs exakt över textens bläck-yta. Mäts via en
-       dold SVG-<text> med SAMMA typografi och getBBox() — det ger det
-       FAKTISKT renderade bläckets gränser, med spärr och fallback-
-       typsnitt medräknade, oavsett enhet. Den gamla canvas-metriken
-       mätte "30" UTAN den negativa spärren (samma fälla som skölden
-       varnar för) och kunde dessutom lösa typsnittsfamiljen annorlunda
-       än DOM:en — på mobil (74pt, ev. annan fallback) syntes det som
-       att kometerna låg offset åt vänster. */
+    /* Kometens svg-box läggs exakt över textens bläck-yta — bläck-boxen
+       i BÅDA led (inte radboxen, som räknar med typsnittets egen luft
+       och gav ett synligt sidledes offset innan). actualBoundingBoxLeft
+       är NEGATIV när bläcket börjar till höger om ursprungspunkten
+       (verifierat i webbläsare, samma tecken som inkMitt2 ovan). */
     if(kmtEl && kmtInstanser){
-      if(!kmtProbe){
-        var ps = document.createElementNS(SVGNS,'svg');
-        ps.setAttribute('aria-hidden','true');
-        ps.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;visibility:hidden';
-        kmtProbe = document.createElementNS(SVGNS,'text');
-        kmtProbe.setAttribute('x','0'); kmtProbe.setAttribute('y','0');
-        kmtProbe.textContent = '30';
-        ps.appendChild(kmtProbe);
-        wrap.appendChild(ps);
-      }
-      var pcs = getComputedStyle(numEl);
-      kmtProbe.style.font = pcs.fontStyle+' '+pcs.fontWeight+' '+pcs.fontSize+' '+pcs.fontFamily;
-      kmtProbe.style.letterSpacing = pcs.letterSpacing;
-      var bb = kmtProbe.getBBox();
-      /* Probens origo (x=0, baslinje y=0) motsvarar radboxens vänster-
-         kant + den uppmätta baslinjen i DOM:en. */
-      kmtEl.style.left   = (num.box.left + bb.x - wr.left).toFixed(2)+'px';
-      kmtEl.style.top    = (num.baseline + bb.y - wr.top).toFixed(2)+'px';
-      kmtEl.style.width  = bb.width.toFixed(2)+'px';
-      kmtEl.style.height = bb.height.toFixed(2)+'px';
+      var inkLeft = num.box.left - nmm.actualBoundingBoxLeft;
+      var inkTop  = num.baseline - num.asc;
+      var inkW    = nmm.actualBoundingBoxLeft + nmm.actualBoundingBoxRight;
+      var inkH    = num.asc + num.desc;
+      kmtEl.style.left   = (inkLeft - wr.left).toFixed(2)+'px';
+      kmtEl.style.top    = (inkTop  - wr.top ).toFixed(2)+'px';
+      kmtEl.style.width  = inkW.toFixed(2)+'px';
+      kmtEl.style.height = inkH.toFixed(2)+'px';
       if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
     }
 
