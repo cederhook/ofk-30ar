@@ -1830,7 +1830,13 @@ section{padding-block:var(--section);position:relative}
     filt.appendChild(fm);
     defs.appendChild(filt);
     var grupper = kmtEl.querySelectorAll('.kc');
-    grupper.forEach(function(g){ g.setAttribute('filter','url(#kmtBloom)'); });
+    /* Bloom bara på desktop — verifierad glödande på iPhone 15 Pro Max,
+       men gaussen räknas om varje bildruta (fälla 2 i 12:an) och den
+       telefonen är taket, inte golvet. Under mobilbrytpunkten bär
+       lagerstacken glöden själv, bara skarpare. */
+    if(!matchMedia('(max-width: 760px)').matches){
+      grupper.forEach(function(g){ g.setAttribute('filter','url(#kmtBloom)'); });
+    }
     /* Mät varje kontur en gång; mallelementen renderar aldrig själva
        (stroke:none) — varje placering klonar sina egna lager. */
     var konturData = [];
