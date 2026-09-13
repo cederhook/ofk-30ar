@@ -915,13 +915,19 @@ section{padding-block:var(--section);position:relative}
   line-height:1.12;text-transform:uppercase}
 .foot-sub{margin:calc(var(--u)*.9) 0 0;font-size:calc(var(--u)*1.05);
   letter-spacing:.13em;text-transform:uppercase;color:rgba(239,233,221,.5)}
+/* Bandets radbryt styrs för hand: .bd bryter på desktop (två rader),
+   .bm på mobil (fyra). Typografin får aldrig chansa med bindestreck. */
+.foot-band .bm{display:none}
 .foot-inner .cta{margin-top:calc(var(--u)*2)}
 .foot-inner .btn{padding:calc(var(--u)*.85) calc(var(--u)*2);
   font-size:calc(var(--u)*.95)}
 @media(max-width:760px){
   .foot-inner{--u:clamp(6px,3.1vw,12px);
     padding:clamp(28px,6vh,60px) var(--pad) clamp(56px,9vh,90px)}
-  .foot-band{font-size:calc(var(--u)*2.5);max-width:16ch}
+  /* max-width släpps: raderna bryts av .bm, inte av måttet */
+  .foot-band{font-size:calc(var(--u)*2.5);max-width:none}
+  .foot-band .bm{display:inline}
+  .foot-band .bd{display:none}
 }
 /* Byråkredit längst ner — gul spärrad versaltext flankerar Adeprimos
    vita ordmärke, som i Anders skiss. */
@@ -943,9 +949,20 @@ section{padding-block:var(--section);position:relative}
   font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
   color:rgba(239,233,221,.34)}
 @media(max-width:640px){
-  .foot-photo{height:auto;min-height:0;max-height:none;aspect-ratio:3/4}
+  /* 2:3 i stället för 3:4 — treraders-krediten behöver ~40px mer höjd
+     än 3:4-boxen ger på en 390-skärm, annars krockar den med metan. */
+  .foot-photo{height:auto;min-height:0;max-height:none;aspect-ratio:2/3}
   .foot-meta{position:absolute;padding:0;flex-direction:column;
     align-items:center;text-align:center;gap:4px}
+  /* Mindre enhet = hela blocket krymper som ett och slutar krocka med
+     metaraderna. Kreditraden skalas separat: den är px-satt, inte u-satt. */
+  .foot-inner{--u:clamp(5px,2.4vw,9px)}
+  /* Flankeringen ryms inte på en mobilrad utan att bli myrtext — tre
+     centrerade rader i stället: vi tackar / adeprimo / för hjälpen …
+     Baslinjeskiftet av (det gäller bara baseline-flex). */
+  .foot-credit{flex-direction:column;align-items:center;gap:8px;
+    font-size:12px;letter-spacing:.16em;margin-top:20px}
+  .foot-credit img{height:28px;transform:none}
 }
 
 /* --- PLATSHÅLLARE --------------------------------------------------------- */
@@ -1431,7 +1448,7 @@ section{padding-block:var(--section);position:relative}
         <span class="yr">96</span>
       </div>
 
-      <p class="foot-band au">Varmt välkomna att fira<br>ÖFK:s 30-årsjubileum tillsammans</p>
+      <p class="foot-band au">Varmt välkomna<br class="bm"> att fira<br class="bd"> ÖFK:s<br class="bm"> 30-årsjubileum<br class="bm"> tillsammans</p>
       <p class="foot-sub">Lördag 10 oktober · Gamla Teatern · 695 kr</p>
 
       <div class="cta">
