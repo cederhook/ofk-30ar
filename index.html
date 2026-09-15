@@ -7,6 +7,18 @@
 <meta name="description" content="Östersunds FK fyller 30 år. Jubileumskväll på Gamla Teatern lördag 10 oktober 2026. Trerätters, allsång med Toves orkester, auktion och Silversnow.">
 <meta property="og:title" content="ÖFK 30 år — Jubileumsfest">
 <meta property="og:description" content="Gamla Teatern, lördag 10 oktober 2026. 695 kr. Biljettsläpp måndag 14 september.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://30.ostersundsfk.se/">
+<meta property="og:site_name" content="Östersunds FK">
+<meta property="og:locale" content="sv_SE">
+<!-- Byt ALDRIG innehåll på samma filnamn — immutable-cachen serverar gamla
+     bytes för evigt. Ny bild = nytt filnamn (og-hero-2.jpg osv). -->
+<meta property="og:image" content="https://30.ostersundsfk.se/img/ofk-30-thumbnail.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="ÖFK 30 år — En kväll att fira. Gamla Teatern, lördag 10 oktober.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://30.ostersundsfk.se/img/ofk-30-thumbnail.png">
 <link rel="icon" href="img/ofk-logo-white.png">
 <!-- ÖFK:s eget Adobe Fonts-projekt. Adeprimos kit (bez5cuz) ska inte
      hänga i den här sidan. OBS: kitet innehåller i dag BARA Rift —
@@ -1036,7 +1048,12 @@ section{padding-block:var(--section);position:relative}
   .foot-band p{font-size:11pt}
   .foot-meta{position:static;color:#666;padding-top:8px}
 }
+
+/* ?og=1 — bara för delningsbildens screenshot: nedräkningen fryser fel i en
+   statisk bild ("25 dagar" ljuger dagen efter), så den döljs vid fotografering. */
+html.og .cd{display:none!important}
 </style>
+<script>if(location.search.indexOf('og=1')>-1)document.documentElement.classList.add('og')</script>
 </head>
 <body>
 
