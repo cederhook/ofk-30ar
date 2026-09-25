@@ -63,9 +63,9 @@
   --gold-bright:#fae198;
   --gold-hi:#fff3c4;
   --gold-lo:#9a721d;
-  --bone:#efe9dd;
-  --dim:#efe9dd;                /* brödtext = vitt. Äldre läsare, ingen grå tävlan */
-  --faint:#efe9dd;
+  --bone:#e7ddc9;
+  --dim:#e7ddc9;                /* brödtext = vitt. Äldre läsare, ingen grå tävlan */
+  --faint:#e7ddc9;
   --line:rgba(230,194,100,.20);
   --line-soft:rgba(239,233,221,.11);
   /* Guldglöd i tre styrkor. Text-shadow, inte drop-shadow — går att lägga
@@ -150,8 +150,8 @@ section h2{text-transform:uppercase;letter-spacing:-.018em;line-height:1.06}
 h3{font-size:var(--fs-h3);font-weight:700;letter-spacing:var(--tr-heading);line-height:1.12;margin:0 0 .35em}
 p{margin:0 0 1em}p:last-child{margin-bottom:0}
 .lead{font-size:var(--fs-lead);line-height:1.44;font-weight:400;letter-spacing:-.022em;color:var(--dim)}
-/* Ingressen i toppen: gräddvit — varmare än bone, samma kontrast. */
-.hero .lead{color:#f6ebd0}
+/* Ingressen i toppen: samma gräddvita som all annan text (#e7ddc9). */
+.hero .lead{color:var(--bone)}
 .eyebrow{display:inline-flex;align-items:center;gap:.75em;font-size:var(--fs-eyebrow);
   font-weight:700;letter-spacing:var(--tr-eyebrow);text-transform:uppercase;color:var(--gold)}
 .eyebrow::before{content:"";width:28px;height:2px;background:var(--red)}
@@ -1075,6 +1075,23 @@ section{padding-block:var(--section);position:relative}
 /* ?og=1 — bara för delningsbildens screenshot: nedräkningen fryser fel i en
    statisk bild ("25 dagar" ljuger dagen efter), så den döljs vid fotografering. */
 html.og .cd{display:none!important}
+/* ZOOM/SYNFEL: under 320 px CSS-bredd finns ingen riktig telefon — dit når
+   man bara genom att förstora (Safari aA, Cmd/Ctrl+, 200–300 %). Där får
+   ALLT bryta: inga enradslås, inga minbredder, avstavning. Hellre fler
+   rader än text som kapas av sektionens overflow:hidden. */
+@media(max-width:300px){
+  *{min-width:0}
+  body{overflow-wrap:break-word;hyphens:auto;-webkit-hyphens:auto}
+  :root{--pad:12px}
+  .hero{padding-inline:10px}
+  .hero h1,.hero h1.in{white-space:normal;letter-spacing:.04em;animation:none}
+  .herofacts{grid-template-columns:1fr;justify-content:start;row-gap:1em}
+  .herofacts b,.btn,.eyebrow{white-space:normal}
+  .btn{flex-wrap:wrap;justify-content:center;text-align:center}
+  .eyebrow{flex-wrap:wrap}
+  .cd{flex-wrap:wrap;gap:.6em 1em}
+}
+.av,.av *,.av *::before,.av *::after{animation-play-state:paused!important}
 </style>
 <script>if(location.search.indexOf('og=1')>-1)document.documentElement.classList.add('og')</script>
 </head>
@@ -1564,6 +1581,23 @@ html.og .cd{display:none!important}
     hv.load();
     var pl = hv.play();
     if(pl && pl.catch) pl.catch(function(){});   /* autoplay nekad = affisch kvar */
+    /* Pausa när heron är utscrollad — den dekodade video hela besöket. */
+    if(window.IntersectionObserver) new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(e.isIntersecting){ var pp = hv.play(); if(pp && pp.catch) pp.catch(function(){}); }
+        else hv.pause();
+      });
+    }).observe(hv);
+  }
+
+  /* Oändliga CSS-animationer (knappglöd, svep, knappkomet, guldflöde, sken,
+     ljusfläck) målar om varje bildruta även när de är utanför skärmen.
+     .av = "av": fryser dem på plats tills blocket syns igen. */
+  if(window.IntersectionObserver){
+    var avIO = new IntersectionObserver(function(es){
+      es.forEach(function(e){ e.target.classList.toggle('av', !e.isIntersecting); });
+    });
+    document.querySelectorAll('.hero,.foot-inner').forEach(function(el){ avIO.observe(el); });
   }
 
   /* ---- marquee-filmen: laddas och spelar BARA när bandet är i vy.
@@ -1742,6 +1776,27 @@ html.og .cd{display:none!important}
      varandra i en jämn sekvens i stället för att blinka slumpvis. */
   var kmtInstanser = null;
   var kmtLast = 0, kmtRaf = 0;
+  /* Synlig = 30:an är i vy. Allt som startar loopen MÅSTE fråga den här —
+     mat() körs vid varje resize, och iOS skickar resize när adressfältet
+     fälls ihop under scroll. Då startades kometerna om nere på sidan. */
+  var kmtSynlig = !window.IntersectionObserver;
+  /* Touch = telefon/platta: 30 bilder/s. Glöden rör sig långsamt, skillnaden
+     syns inte i den storleken, men jobbet halveras (en fjärdedel mot 120 Hz). */
+  var KMT_TOUCH = matchMedia('(pointer:coarse)').matches;
+  /* SPÄRR FÖR GAMLA TELEFONER (Anders: "stäng hellre av kometerna än
+     blidka alla" — sidan ska gå att läsa för alla). Kometerna mäter sig
+     själva: efter 2,5 s insvängning räknas 60 bildrutor. Är mer än var
+     fjärde ett hack (>50 ms mellan rutor, alltså ≥2 tappade även i 30 fps)
+     klarar enheten inte jobbet → kometerna tonas bort och stannar av
+     resten av besöket. Lågenergiläget (stadiga 33 ms) räknas INTE som hack.
+     ≤2 kärnor (riktigt gamla Android) får dem aldrig. */
+  var kmtAv = !!(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+  var kmtProv = {t0:0, n:0, hack:0, klar:false};
+  function kometAv(){
+    kmtAv = true;
+    if(kmtRaf){ cancelAnimationFrame(kmtRaf); kmtRaf = 0; }
+    if(kmtEl){ kmtEl.style.transition = 'opacity .8s ease-out'; kmtEl.style.opacity = '0'; }
+  }
 
   function kmtFarg(rgb){ return 'rgb('+rgb[0]+','+rgb[1]+','+rgb[2]+')'; }
   /* Illustrator exporterar en glyfs yttring och hål åt MOTSATT håll (så
@@ -1750,6 +1805,27 @@ html.og .cd{display:none!important}
      vridriktning via signerad yta (shoelace) och normalisera alla till
      medsols. Verifierat tecken för tecken mot en enhetskvadrat i SVG:s
      eget Y-ner-koordinatsystem, inte gissat: positiv summa = medsols. */
+  /* VÄRME (sep 2026): getPointAtLength är dyr — den integrerar längs
+     Bézierkurvan varje anrop, och loopen gjorde ~160 per bildruta (9
+     kometer x 7 lager x nos+svans, plus solnormalen). På en 120 Hz-iPhone
+     blev telefonen glödhet. Nu samplas varje kontur EN gång vid bygget
+     (1024 punkter) och loopen interpolerar linjärt i tabellen: samma
+     punkter på bråkdelen av en enhet, noll geometrianrop per bildruta. */
+  var KMT_LUT_N = 1024;
+  function kmtLut(path, len){
+    var xs = new Float32Array(KMT_LUT_N), ys = new Float32Array(KMT_LUT_N);
+    for(var i=0;i<KMT_LUT_N;i++){
+      var p = path.getPointAtLength(len*i/KMT_LUT_N); xs[i] = p.x; ys[i] = p.y;
+    }
+    return {xs:xs, ys:ys};
+  }
+  function kmtPunkt(inst, s){
+    var t = (((s/inst.len)%1)+1)%1 * KMT_LUT_N;
+    var i0 = Math.floor(t), fr = t - i0, i1 = (i0+1) % KMT_LUT_N;
+    i0 = i0 % KMT_LUT_N;
+    var xs = inst.lut.xs, ys = inst.lut.ys;
+    return {x: xs[i0] + (xs[i1]-xs[i0])*fr, y: ys[i0] + (ys[i1]-ys[i0])*fr};
+  }
   function kmtRiktning(path, len){
     var N = 32, pts = [], i;
     for(i=0;i<N;i++) pts.push(path.getPointAtLength(len*i/N));
@@ -1773,6 +1849,18 @@ html.og .cd{display:none!important}
   function kometRita(nu){
     kmtRaf = requestAnimationFrame(kometRita);
     if(!kmtInstanser) return;
+    if(KMT_TOUCH && kmtLast && nu - kmtLast < 28) return;
+    if(!kmtProv.klar && kmtLast){
+      if(!kmtProv.t0) kmtProv.t0 = nu;
+      var iv = nu - kmtLast;
+      if(nu - kmtProv.t0 > 2500 && iv < 1000){   /* >1 s = flik i bakgrunden, inte hack */
+        kmtProv.n++; if(iv > 50) kmtProv.hack++;
+        if(kmtProv.n >= 60){
+          kmtProv.klar = true;
+          if(kmtProv.hack/kmtProv.n > .25){ kometAv(); return; }
+        }
+      }
+    }
     var dt = Math.min(80, kmtLast ? nu - kmtLast : 16); kmtLast = nu;
     var rate = 100/KMT_DVALJ_MS;
 
@@ -1803,8 +1891,8 @@ html.og .cd{display:none!important}
       var nPct = riktning > 0 ? inst.localP : (100 - inst.localP);
       var nS = ((nPct/100*len) % len + len) % len;
       var dS = len * .015;
-      var pA = inst.path.getPointAtLength(((nS-dS)%len+len)%len);
-      var pB = inst.path.getPointAtLength(((nS+dS)%len+len)%len);
+      var pA = kmtPunkt(inst, nS-dS);
+      var pB = kmtPunkt(inst, nS+dS);
       var tx = pB.x-pA.x, ty = pB.y-pA.y;
       var tl = Math.sqrt(tx*tx+ty*ty) || 1;
       var nx = ty/tl, ny = -tx/tl;
@@ -1867,8 +1955,8 @@ html.og .cd{display:none!important}
           var svansPct = riktning>0 ? g : gPlusL;
           var nosS = ((nosPct/100*len) % len + len) % len;
           var svansS = ((svansPct/100*len) % len + len) % len;
-          var nos = inst.path.getPointAtLength(nosS);
-          var svans = inst.path.getPointAtLength(svansS);
+          var nos = kmtPunkt(inst, nosS);
+          var svans = kmtPunkt(inst, svansS);
           lg.grad.setAttribute('x1', nos.x.toFixed(2));
           lg.grad.setAttribute('y1', nos.y.toFixed(2));
           lg.grad.setAttribute('x2', svans.x.toFixed(2));
@@ -1923,7 +2011,8 @@ html.og .cd{display:none!important}
     grupper.forEach(function(g){
       var mall = g.querySelector('.seg');
       var len = mall.getTotalLength();
-      konturData.push({g:g, mall:mall, len:len, riktning:kmtRiktning(mall, len)});
+      konturData.push({g:g, mall:mall, len:len, riktning:kmtRiktning(mall, len),
+                       lut:kmtLut(mall, len)});
       mall.style.stroke = 'none';
     });
 
@@ -2038,17 +2127,19 @@ html.og .cd{display:none!important}
         lager.push({el:el, grad:grad, l:lU, f:fU,
           bw: def.w * pl.skala, glod: lg < 5});
       }
-      kmtInstanser.push({lager:lager, path:kd.mall, len:kd.len,
+      kmtInstanser.push({lager:lager, path:kd.mall, len:kd.len, lut:kd.lut,
         riktning:kd.riktning, localP: pl.fas*100,
         occl: kd.occl, fart: .75 + Math.random()*.6});
     });
   }
   kometBygg();
+  if(kmtAv) kometAv();
   if(kmtEl && window.IntersectionObserver){
     new IntersectionObserver(function(es){
       es.forEach(function(e){
-        if(e.isIntersecting){ if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita); }
-        else if(kmtRaf){ cancelAnimationFrame(kmtRaf); kmtRaf = 0; }
+        kmtSynlig = e.isIntersecting;
+        if(e.isIntersecting){ if(!kmtRaf && !kmtAv) kmtRaf = requestAnimationFrame(kometRita); }
+        else if(kmtRaf){ cancelAnimationFrame(kmtRaf); kmtRaf = 0; kmtLast = 0; }
       });
     }, {rootMargin:'100px'}).observe(kmtEl);
   }
@@ -2092,7 +2183,7 @@ html.og .cd{display:none!important}
       kmtEl.style.top    = (num.box.top  + .3564*kmtF - wr.top ).toFixed(2)+'px';
       kmtEl.style.width  = (.716*kmtF).toFixed(2)+'px';
       kmtEl.style.height = (.716*kmtF).toFixed(2)+'px';
-      if(!kmtRaf) kmtRaf = requestAnimationFrame(kometRita);
+      if(!kmtRaf && kmtSynlig && !kmtAv) kmtRaf = requestAnimationFrame(kometRita);
     }
 
     /* SKÖLDEN — exakt mått, exakt mitt.
