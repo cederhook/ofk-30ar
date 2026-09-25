@@ -62,8 +62,8 @@
   --gold-hi:#fff3c4;
   --gold-lo:#9a721d;
   --bone:#efe9dd;
-  --dim:rgba(239,233,221,.64);
-  --faint:rgba(239,233,221,.40);
+  --dim:#efe9dd;                /* brödtext = vitt. Äldre läsare, ingen grå tävlan */
+  --faint:#efe9dd;
   --line:rgba(230,194,100,.20);
   --line-soft:rgba(239,233,221,.11);
   /* Guldglöd i tre styrkor. Text-shadow, inte drop-shadow — går att lägga
@@ -560,7 +560,7 @@ section{padding-block:var(--section);position:relative}
   line-height:.9;letter-spacing:-.02em;font-variant-numeric:tabular-nums;
   text-shadow:var(--glow-2)}
 .cd .l{font-size:calc(var(--u)*.62);font-weight:700;letter-spacing:.2em;
-  text-transform:uppercase;color:rgba(239,233,221,.42)}
+  text-transform:uppercase;color:var(--bone)}
 .cd .sep{font-family:var(--font-display);font-size:calc(var(--u)*1.5);
   color:rgba(230,194,100,.28);line-height:1.1;padding-bottom:calc(var(--u)*.88)}
 .cd.done{display:block;text-align:center;font-weight:700;letter-spacing:.14em;
@@ -582,7 +582,7 @@ section{padding-block:var(--section);position:relative}
 /* Förskjuten start per cell — annars pulserar de fyra i takt och läser
    som en skylt i stället för fyra beslag i metall. */
 .herofacts span{display:block;margin-top:calc(var(--u)*.35);
-  font-size:calc(var(--u)*.79);line-height:1.36;color:rgba(239,233,221,.5)}
+  font-size:calc(var(--u)*.79);line-height:1.36;color:var(--bone)}
 
 /* --- Mobil: samma lockup, egna proportioner --------------------------------
    På en stående skärm är vh gott om men vw knappt, så trettian får styras av
@@ -838,7 +838,7 @@ section{padding-block:var(--section);position:relative}
   border-radius:var(--r-sm);box-shadow:0 14px 34px rgba(0,0,0,.55);
   will-change:transform,opacity}
 .tl-bild figcaption{margin-top:7px;font-size:11px;line-height:1.4;
-  color:rgba(239,233,221,.34);letter-spacing:.02em}
+  color:var(--bone);letter-spacing:.02em}
 .tl:last-child{border-bottom:1px solid var(--line-soft)}
 /* Årtalen går i samma guld och samma flöde som trettian. Starten är
    förskjuten rad för rad, annars pulserar hela tidslinjen i takt och
@@ -926,7 +926,7 @@ section{padding-block:var(--section);position:relative}
   font-size:calc(var(--u)*3.1);letter-spacing:.06em;
   line-height:1.12;text-transform:uppercase}
 .foot-sub{margin:calc(var(--u)*.9) 0 0;font-size:calc(var(--u)*1.05);
-  letter-spacing:.13em;text-transform:uppercase;color:rgba(239,233,221,.5)}
+  letter-spacing:.13em;text-transform:uppercase;color:var(--bone)}
 /* Bandets radbryt styrs för hand: .bd bryter på desktop (två rader),
    .bm på mobil (fyra). Typografin får aldrig chansa med bindestreck. */
 .foot-band .bm{display:none}
@@ -959,7 +959,7 @@ section{padding-block:var(--section);position:relative}
 .foot-meta{position:absolute;z-index:3;left:var(--pad);right:var(--pad);
   bottom:clamp(12px,2vw,26px);display:flex;justify-content:space-between;gap:var(--sp-3);
   font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
-  color:rgba(239,233,221,.34)}
+  color:var(--bone)}
 @media(max-width:640px){
   /* 2:3 i stället för 3:4 — treraders-krediten behöver ~40px mer höjd
      än 3:4-boxen ger på en 390-skärm, annars krockar den med metan. */
