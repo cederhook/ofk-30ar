@@ -1790,9 +1790,22 @@ html.og .cd{display:none!important}
      fjärde ett hack (>50 ms mellan rutor, alltså ≥2 tappade även i 30 fps)
      klarar enheten inte jobbet → kometerna tonas bort och stannar av
      resten av besöket. Lågenergiläget (stadiga 33 ms) räknas INTE som hack.
-     ≤2 kärnor (riktigt gamla Android) får dem aldrig. */
-  var kmtAv = !!(navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+     INTE hardwareConcurrency: iOS Safari rapporterar ett lågt fast värde
+     (anti-fingeravtryck) — spärren stängde av kometerna på ALLA iPhones.
+     Rutor nära scroll/touch räknas inte: iOS stryper rAF under scroll. */
+  var kmtAv = false;
   var kmtProv = {t0:0, n:0, hack:0, klar:false};
+  var kmtRor = 0;   /* senaste scroll/touch — rutor inom 300 ms mäts inte */
+  ['scroll','touchstart','touchmove'].forEach(function(ev){
+    addEventListener(ev, function(){ kmtRor = performance.now(); }, {passive:true});
+  });
+  /* ?kmtdebug — visar mätningen på skärmen, för test på riktig telefon. */
+  var kmtDbg = /kmtdebug/.test(location.search) ? document.createElement('div') : null;
+  if(kmtDbg){
+    kmtDbg.style.cssText = 'position:fixed;left:8px;bottom:8px;z-index:9999;padding:4px 8px;'+
+      'background:rgba(0,0,0,.8);color:#0f0;font:12px/1.3 monospace;border-radius:4px';
+    document.body.appendChild(kmtDbg);
+  }
   function kometAv(){
     kmtAv = true;
     if(kmtRaf){ cancelAnimationFrame(kmtRaf); kmtRaf = 0; }
@@ -1855,11 +1868,14 @@ html.og .cd{display:none!important}
       if(!kmtProv.t0) kmtProv.t0 = nu;
       var iv = nu - kmtLast;
       if(nu - kmtProv.t0 > 2500 && iv < 1000){   /* >1 s = flik i bakgrunden, inte hack */
-        kmtProv.n++; if(iv > 50) kmtProv.hack++;
+        if(nu - kmtRor > 300){ kmtProv.n++; if(iv > 50) kmtProv.hack++; }
         if(kmtProv.n >= 60){
           kmtProv.klar = true;
-          if(kmtProv.hack/kmtProv.n > .25){ kometAv(); return; }
+          if(kmtProv.hack/kmtProv.n > .25){ kometAv(); }
         }
+        if(kmtDbg) kmtDbg.textContent = 'komet: '+kmtProv.n+'/60 rutor, '+kmtProv.hack+' hack, iv '+
+          Math.round(iv)+' ms'+(kmtProv.klar ? (kmtAv ? ' → AV' : ' → PÅ') : '');
+        if(kmtAv) return;
       }
     }
     var dt = Math.min(80, kmtLast ? nu - kmtLast : 16); kmtLast = nu;
