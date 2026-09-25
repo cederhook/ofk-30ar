@@ -605,13 +605,14 @@ section{padding-block:var(--section);position:relative}
   /* --fs-thirty MÅSTE deklareras där mobilens --u finns. Låg den kvar på
      :root räknades den mot desktopens --u, och mobilgraden slog aldrig
      igenom — trettian blev kvar på en åttondel av skärmen. */
-  /* Höjdbudget: toppen till UNDERKANTEN av "Till biljetter" är 51u (mätt),
-     +1,6u luft ovanför skölden +2u under knappen = 54,6u → 1,83svh. Knappen är alltid sista man ser
-     på första skärmen. Golv 10,5px på höjdtermen: på riktigt låga telefoner
-     krymper vi inte till oläsligt — där får man scrolla. Bredden styr
-     fortfarande om den är trängre (3,12vw). */
-  .hero{--u:clamp(8px,min(3.12vw,max(1.83vh,10.5px)),34px);
-    --u:clamp(8px,min(3.12vw,max(1.83svh,10.5px)),34px);padding-inline:max(16px,calc(var(--u)*1.6));
+  /* Höjdbudget: HELA toppen inkl. nedräkningen är 62,2u (mätt), +2u luft
+     = 64u → 100svh/64 = 1,55svh. Allt syns på första skärmen, med marginal
+     (Anders, 16 Pro Max: "så jag ser allt"). Golv 10px på höjdtermen: på
+     riktigt låga telefoner krymper vi inte till oläsligt — där får man
+     scrolla, men knappen (52,6u) ryms ändå ner till ~530px höjd. Bredden
+     styr om den är trängre (3,12vw). */
+  .hero{--u:clamp(8px,min(3.12vw,max(1.55vh,10px)),34px);
+    --u:clamp(8px,min(3.12vw,max(1.55svh,10px)),34px);padding-inline:max(16px,calc(var(--u)*1.6));
     --fs-thirty:calc(var(--u)*15.5);
     /* Rubriken: 7,87em bred vid slutspärren .12em (mätt i Rift). 3,33u
        (= 10,4vw när bredden styr --u) fyller ~90 % och ryms ner till 320. */
