@@ -1786,15 +1786,14 @@ html.og .cd{display:none!important}
   var KMT_TOUCH = matchMedia('(pointer:coarse)').matches;
   /* SPÄRR FÖR GAMLA TELEFONER (Anders: "stäng hellre av kometerna än
      blidka alla" — sidan ska gå att läsa för alla). Kometerna mäter sig
-     själva: efter 2,5 s insvängning räknas 60 bildrutor. Är mer än var
-     fjärde ett hack (>50 ms mellan rutor, alltså ≥2 tappade även i 30 fps)
-     klarar enheten inte jobbet → kometerna tonas bort och stannar av
-     resten av besöket. Lågenergiläget (stadiga 33 ms) räknas INTE som hack.
+     själva: efter 2,5 s insvängning samlas 60 bildrutor. Är mediantakten
+     sämre än ~22 fps klarar enheten inte jobbet → kometerna tonas bort och
+     stannar av resten av besöket.
      INTE hardwareConcurrency: iOS Safari rapporterar ett lågt fast värde
      (anti-fingeravtryck) — spärren stängde av kometerna på ALLA iPhones.
      Rutor nära scroll/touch räknas inte: iOS stryper rAF under scroll. */
   var kmtAv = false;
-  var kmtProv = {t0:0, n:0, hack:0, klar:false};
+  var kmtProv = {t0:0, iv:[], klar:false};
   var kmtRor = 0;   /* senaste scroll/touch — rutor inom 300 ms mäts inte */
   ['scroll','touchstart','touchmove'].forEach(function(ev){
     addEventListener(ev, function(){ kmtRor = performance.now(); }, {passive:true});
@@ -1868,13 +1867,20 @@ html.og .cd{display:none!important}
       if(!kmtProv.t0) kmtProv.t0 = nu;
       var iv = nu - kmtLast;
       if(nu - kmtProv.t0 > 2500 && iv < 1000){   /* >1 s = flik i bakgrunden, inte hack */
-        if(nu - kmtRor > 300){ kmtProv.n++; if(iv > 50) kmtProv.hack++; }
-        if(kmtProv.n >= 60){
+        if(nu - kmtRor > 300) kmtProv.iv.push(iv);
+        var med = 0;
+        if(kmtProv.iv.length >= 60){
           kmtProv.klar = true;
-          if(kmtProv.hack/kmtProv.n > .25){ kometAv(); }
+          /* MEDIAN, inte andel hack: iOS levererar ojämnt (33/66 ms om
+             vartannat i lågenergi och under inladdning) — en andels-
+             räkning stängde av kometerna på en 16 Pro Max. Bara en enhet
+             som STADIGT ligger under ~22 fps (median >45 ms, målet är 30
+             på touch / 60 annars) är för svag. */
+          med = kmtProv.iv.slice().sort(function(a,b){return a-b;})[30];
+          if(med > 45) kometAv();
         }
-        if(kmtDbg) kmtDbg.textContent = 'komet: '+kmtProv.n+'/60 rutor, '+kmtProv.hack+' hack, iv '+
-          Math.round(iv)+' ms'+(kmtProv.klar ? (kmtAv ? ' → AV' : ' → PÅ') : '');
+        if(kmtDbg) kmtDbg.textContent = 'komet: '+kmtProv.iv.length+'/60 rutor, iv '+Math.round(iv)+
+          ' ms'+(kmtProv.klar ? ', median '+Math.round(med)+' ms → '+(kmtAv ? 'AV' : 'PÅ') : '');
         if(kmtAv) return;
       }
     }
