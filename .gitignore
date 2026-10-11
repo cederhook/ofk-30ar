@@ -1,3 +1,20 @@
 .DS_Store
 .vercel/
 media/source/
+
+bildspel/
+bilder festen/
+# lösa filmer i roten (arbetsfiler för klippning)
+/*.mov
+/*.MOV
+export
+
+# videohälsningarna (personliga filmer, bara på testytan)
+halsningar/
+backdrop/
+Prospects/
+op-kalla
+op-klara
+
+# festens minnessida (hälsningar = bara testytan)
+minnen/

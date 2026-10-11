@@ -2,11 +2,56 @@
   "headers": [
     {
       "source": "/media/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/img/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/minnen",
+      "destination": "/minnen/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/minnen/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "30.ostersundsfk.se"
+        }
+      ],
+      "destination": "https://ofk-30ar.vercel.app/minnen/:path*"
+    },
+    {
+      "source": "/minnen/lista.js",
+      "destination": "/backdrop/lista.js"
+    },
+    {
+      "source": "/minnen/bilder.js",
+      "destination": "/bildspel/bilder.js"
+    },
+    {
+      "source": "/minnen/film/:fil",
+      "destination": "/backdrop/film/:fil"
+    },
+    {
+      "source": "/minnen/bilder/:fil*",
+      "destination": "/bildspel/bilder/:fil*"
     }
   ]
 }

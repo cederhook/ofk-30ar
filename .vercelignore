@@ -1,2 +1,24 @@
 media/source
 *.psd
+bilder festen
+# Bildspelet laddas upp till testytan (ofk-30ar.vercel.app/bildspel) — men
+# inte verktygen. Mappen är git-ignorerad, så 30.ostersundsfk.se (byggs från
+# git) får den aldrig.
+bildspel/bygg.py
+bildspel/kor.py
+bildspel/.kallsummor.json
+bildspel/ordning.txt
+bildspel/__pycache__
+# lösa filmer i roten
+/*.mov
+/*.MOV
+export
+
+# hälsningarnas källfiler och verktyg
+backdrop/kalla
+backdrop/konv.sh
+Prospects
+backdrop/media/MY26*
+backdrop/media/*.ai
+op-kalla
+op-klara
