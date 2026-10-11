@@ -28,6 +28,16 @@
   ],
   "rewrites": [
     {
+      "source": "/minnen/",
+      "has": [
+        {
+          "type": "host",
+          "value": "30.ostersundsfk.se"
+        }
+      ],
+      "destination": "https://ofk-30ar.vercel.app/minnen/index.html"
+    },
+    {
       "source": "/minnen/:path*",
       "has": [
         {
